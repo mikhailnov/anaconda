@@ -152,6 +152,7 @@ enum {
 
 struct _AnacondaBaseWindowPrivate {
     gboolean    is_beta;
+    gboolean    show_layout_indicator;
     GtkWidget  *main_box;
     GtkWidget  *info_revealer, *info_staging;
     GtkWidget  *alignment;
@@ -290,6 +291,13 @@ static void anaconda_base_window_init(AnacondaBaseWindow *win) {
 
     win->priv->is_beta = FALSE;
 
+    win->priv->show_layout_indicator = TRUE;
+
+    if (getenv("ANACONDA_OFF_LAYOUT_INDICATOR") ||
+       (getenv("XDG_CURRENT_DESKTOP") && (strcmp(getenv("XDG_CURRENT_DESKTOP"), "") != 0))) {
+            win->priv->show_layout_indicator = FALSE;
+    }
+
     /* These store the original English strings so that when we retranslate
      * later, we have the source strings available to feed into _().
      */
@@ -384,6 +392,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
     win->priv->orig_beta = g_strdup(DEFAULT_BETA);
 
     /* Create the layout indicator */
+    if (win->priv->show_layout_indicator) {
     win->priv->layout_indicator = anaconda_layout_indicator_new();
     anaconda_layout_indicator_set_label_width(ANACONDA_LAYOUT_INDICATOR(win->priv->layout_indicator),
                                               LAYOUT_INDICATOR_LABEL_WIDTH);
@@ -392,6 +401,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
     gtk_widget_set_hexpand(win->priv->layout_indicator, FALSE);
     gtk_widget_set_margin_top(win->priv->layout_indicator, 6);
     gtk_widget_set_margin_bottom(win->priv->layout_indicator, 6);
+    }
 
     /* Create the help button. */
     win->priv->help_button = gtk_button_new_with_label(_(HELP_BUTTON_LABEL));
@@ -415,7 +425,9 @@ G_GNUC_END_IGNORE_DEPRECATIONS
     gtk_grid_attach(GTK_GRID(win->priv->nav_area), win->priv->name_label, 0, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(win->priv->nav_area), win->priv->distro_label, 1, 0, 2, 1);
     gtk_grid_attach(GTK_GRID(win->priv->nav_area), win->priv->beta_label, 1, 1, 1, 1);
+    if (win->priv->show_layout_indicator) {
     gtk_grid_attach(GTK_GRID(win->priv->nav_area), win->priv->layout_indicator, 1, 2, 1, 1);
+    }
     gtk_grid_attach(GTK_GRID(win->priv->nav_area), win->priv->help_button, 2, 1, 1, 2);
 
     /* Last thing for the main_box is a revealer for the info bar */
@@ -835,7 +847,9 @@ void anaconda_base_window_retranslate(AnacondaBaseWindow *win) {
     gtk_button_set_label(GTK_BUTTON(win->priv->help_button), _(HELP_BUTTON_LABEL));
 
     /* retranslate the layout indicator */
+    if (win->priv->show_layout_indicator) {
     anaconda_layout_indicator_retranslate(ANACONDA_LAYOUT_INDICATOR(win->priv->layout_indicator));
+    }
 }
 
 static GtkBuildableIface *parent_buildable_iface;

@@ -21,6 +21,10 @@
 LIVE_INSTALL=0
 IMAGE_INSTALL=0
 
+# $XDG_CURRENT_DESKTOP is not passed into the root session
+# launched by consolehelper
+export ANACONDA_OFF_LAYOUT_INDICATOR=1
+
 if [ -z "$LIVECMD" ]; then
     LIVE_INSTALL=1
 fi
