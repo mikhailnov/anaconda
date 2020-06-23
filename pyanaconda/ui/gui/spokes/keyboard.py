@@ -18,6 +18,7 @@
 #
 
 import gi
+import os
 gi.require_version("Gkbd", "3.0")
 gi.require_version("Gtk", "3.0")
 
@@ -308,10 +309,19 @@ class KeyboardSpoke(NormalSpoke):
         if flags.flags.automatedInstall and not self._seen:
             return False
 
+        # XXX This code is duplicated here and in passphrase.py...
+        show_layout_indicator = True;
+        if os.getenv("ANACONDA_OFF_LAYOUT_INDICATOR"):
+            show_layout_indicator = False;
+        else:
+            xdg_cdv=os.getenv("XDG_CURRENT_DESKTOP")
+            if (xdg_cdv is not None) and (len(xdg_cdv) > 0):
+                show_layout_indicator = False;
+
         # The currently activated layout is a different from the
         # selected ones. Ignore VNC, since VNC keymaps are weird
         # and more on the client side.
-        if not self._confirmed and not flags.flags.usevnc \
+        if not self._confirmed and not flags.flags.usevnc and show_layout_indicator \
                 and self._xkl_wrapper.get_current_layout() not in self._l12_module.XLayouts:
             return False
 

@@ -18,9 +18,11 @@
 #
 
 import gi
+import os
 gi.require_version("Gtk", "3.0")
+gi.require_version('AnacondaWidgets', '3.3')
 
-from gi.repository import Gtk
+from gi.repository import Gtk, AnacondaWidgets
 
 from pyanaconda.ui.gui import GUIObject
 from pyanaconda.ui.gui.utils import really_hide, really_show, set_password_visibility
@@ -40,6 +42,22 @@ class PassphraseDialog(GUIObject):
 
     def __init__(self, data, default_passphrase=""):
         super().__init__(data)
+
+        show_layout_indicator = True;
+        if os.getenv("ANACONDA_OFF_LAYOUT_INDICATOR"):
+                show_layout_indicator = False;
+        else:
+                xdg_cdv=os.getenv("XDG_CURRENT_DESKTOP")
+                # if env is set and is not empty
+                if (xdg_cdv is not None) and (len(xdg_cdv) > 0):
+                    show_layout_indicator = False;
+
+        if show_layout_indicator:
+                self.li_box = self.builder.get_object('AnacondaLayoutIndicator1')
+                self.li = AnacondaWidgets.LayoutIndicator.new()
+                self.li.set_halign(Gtk.Align(3))
+                self.li.set_label_width(4.0)
+                self.li_box.add(self.li)
 
         self._passphrase_entry = self.builder.get_object("passphrase_entry")
         self._confirm_entry = self.builder.get_object("confirm_pw_entry")
