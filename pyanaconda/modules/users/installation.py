@@ -19,6 +19,7 @@
 import os
 
 from pyanaconda.core import users
+from pyanaconda.core import util
 
 from pyanaconda.modules.common.task import Task
 from pyanaconda.modules.common.structures.user import USER_GID_NOT_SET, USER_UID_NOT_SET
@@ -91,6 +92,19 @@ class CreateUsersTask(Task):
             gid = None
             if user_data.gid != USER_GID_NOT_SET:
                 gid = user_data.gid
+
+            # ROSA ISOs _usually_ contain a user "live"
+            # If we delete this user in %post, then the UID/GID of the user created in the installer
+            # is default+1, e.g. 500+1=501, but the GUI suggests 500 (actually a bug in Anaconda).
+            # So deleting it here. I wonder how Fedora deals with it, maybe they create "liveuser"
+            # when starting the ISO, not building it, and then rsync the original overlay layer to disk?
+            # If user/group do not exist, it is ok.
+            rc = util.execInSysroot("userdel", ["-r", "live"])
+            if rc:
+                pass
+            rc = util.execInSysroot("groupdel", ["live"])
+            if rc:
+                pass
 
             try:
                 users.create_user(username=user_data.name,
