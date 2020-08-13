@@ -64,9 +64,6 @@ class NormalSpoke(GUIObject, common.NormalSpoke):
         GUIObject.__init__(self, data)
         common.NormalSpoke.__init__(self, storage, payload)
 
-        # Add a help handler
-        self.window.connect_after("help-button-clicked", self._on_help_clicked)
-
         # warning message
         self._current_warning_message = ""
 

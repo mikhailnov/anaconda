@@ -419,8 +419,6 @@ class MainWindow(Gtk.Window):
 
         # Help button mnemonics handling
         self._mnemonic_signal = None
-        # we have a sensible initial value, just in case
-        self._saved_help_button_label = _("Help!")
 
         # Apply the initial language attributes
         self._language = None
@@ -452,18 +450,8 @@ class MainWindow(Gtk.Window):
         return False
 
     def _on_mnemonics_visible_changed(self, window, property_type, obj):
-        # mnemonics display has been activated or deactivated,
-        # add or remove the F1 mnemonics display from the help button
-        help_button = obj.window.get_help_button()
-        if window.props.mnemonics_visible:
-            # save current label
-            old_label = help_button.get_label()
-            self._saved_help_button_label = old_label
-            # add the (F1) "mnemonics" to the help button
-            help_button.set_label("%s (F1)" % old_label)
-        else:
-            # restore the old label
-            help_button.set_label(self._saved_help_button_label)
+		# Help button is removed in ROSA
+        return True
 
     def _on_child_added(self, widget, user_data):
         # If this is GtkLabel, apply the language attribute
@@ -488,8 +476,6 @@ class MainWindow(Gtk.Window):
         old_screen = self._stack.get_visible_child()
         if old_screen:
             old_screen.remove_accelerator(self._accel_group, Gdk.KEY_F12, 0)
-            old_screen.remove_accelerator(self._accel_group, Gdk.KEY_F1, 0)
-            old_screen.remove_accelerator(self._accel_group, Gdk.KEY_F1, Gdk.ModifierType.MOD1_MASK)
 
         # Check if the widget is already on the stack
         if child not in self._stack_contents:
@@ -505,17 +491,6 @@ class MainWindow(Gtk.Window):
         elif isinstance(child.window, AnacondaWidgets.SpokeWindow):
             child.window.add_accelerator("button-clicked", self._accel_group,
                     Gdk.KEY_F12, 0, 0)
-
-        # Configure the help button
-        child.window.add_accelerator("help-button-clicked", self._accel_group,
-                Gdk.KEY_F1, 0, 0)
-        child.window.add_accelerator("help-button-clicked", self._accel_group,
-                Gdk.KEY_F1, Gdk.ModifierType.MOD1_MASK, 0)
-
-        # Connect to mnemonics-visible to add the (F1) mnemonic to the button label
-        if self._mnemonic_signal:
-            self.disconnect(self._mnemonic_signal)
-        self._mnemonic_signal = self.connect("notify::mnemonics-visible", self._on_mnemonics_visible_changed, child)
 
         self._stack.set_visible_child(child.window)
 
@@ -808,7 +783,6 @@ class GraphicalUserInterface(UserInterface):
 
         # Use connect_after so classes can add actions before we change screens
         obj.window.connect_after("continue-clicked", self._on_continue_clicked)
-        obj.window.connect_after("help-button-clicked", self._on_help_clicked, obj)
         obj.window.connect_after("quit-clicked", self._on_quit_clicked)
 
         return obj
