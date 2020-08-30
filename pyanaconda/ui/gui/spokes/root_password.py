@@ -33,6 +33,8 @@ from pyanaconda.ui.common import FirstbootSpokeMixIn
 from pyanaconda.ui.communication import hubQ
 from pyanaconda.ui.lib.services import is_reconfiguration_mode
 
+import os
+
 from pyanaconda.anaconda_loggers import get_module_logger
 log = get_module_logger(__name__)
 
@@ -191,7 +193,11 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
 
     @property
     def mandatory(self):
-        """Only mandatory if no admin user has been requested."""
+        """Only mandatory if no admin user has been requested
+           or if setting bootloader password is mandatory
+        """
+        if os.environ.get('ANACONDA_IS_NICKEL') is not None:
+            return True
         return not self._users_module.CheckAdminUserExists()
 
     def apply(self):

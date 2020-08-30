@@ -28,6 +28,8 @@ from pyanaconda.modules.common.constants.services import USERS
 from pyanaconda.core.constants import PASSWORD_POLICY_ROOT
 from pyanaconda.core.configuration.anaconda import conf
 
+import os
+
 from simpleline.render.widgets import TextWidget
 
 
@@ -68,7 +70,11 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
 
     @property
     def mandatory(self):
-        """Only mandatory if no admin user has been requested."""
+        """Only mandatory if no admin user has been requested
+           or if setting bootloader password is mandatory
+        """
+        if os.environ.get('ANACONDA_IS_NICKEL') is not None:
+            return True
         return not self._users_module.CheckAdminUserExists()
 
     @property
@@ -111,5 +117,6 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
 
     def apply(self):
         self._users_module.SetCryptedRootPassword(self._password)
+        self._users_module.SaveRootPassword(self._password)
         if self._password:
             self._users_module.SetRootAccountLocked(False)
