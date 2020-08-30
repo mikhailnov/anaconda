@@ -303,6 +303,11 @@ class GRUB2(BootLoader):
 
         if self.use_bls:
             defaults.write("GRUB_ENABLE_BLSCFG=true\n")
+        # ROSA patch for Grub2 adds --unrestricted by default so that
+        # password is required only to edit Grub entries, but
+        # system can be booted without password
+        # grub2-Add-option-to-password-protect-only-editing-of-entri.patch
+        defaults.write("GRUB_PASSWORD_PROTECT_ONLY_EDITING=true\n")
         defaults.close()
 
     def _encrypt_password(self):
@@ -329,7 +334,9 @@ class GRUB2(BootLoader):
         if not self.password and not self.encrypted_password:
             return
 
-        users_file = "%s%s/%s" % (conf.target.system_root, self.config_dir, self._passwd_file)
+        # Fedora patch "Add friendly grub2 password config tool"
+        # /boot/grub2/user.cfg, in both EFI and legacy
+        users_file = "%s/boot/grub2/%s" % (conf.target.system_root, self._passwd_file)
         header = util.open_with_perm(users_file, "w", 0o700)
         # XXX FIXME: document somewhere that the username is "root"
         self._encrypt_password()
