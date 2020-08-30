@@ -88,6 +88,10 @@ class UsersInterface(KickstartModuleInterface):
         self.implementation.set_root_password(crypted_root_password, crypted=True)
 
     @emits_properties_changed
+    def SaveRootPassword(self, root_password: Str):
+        self.implementation.save_root_password(root_password)
+
+    @emits_properties_changed
     def ClearRootPassword(self):
         """Clear any set root password."""
         self.implementation.clear_root_password()

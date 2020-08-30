@@ -31,6 +31,8 @@ from pyanaconda.ui.gui.utils import set_password_visibility
 from pyanaconda.ui.common import FirstbootSpokeMixIn
 from pyanaconda.ui.communication import hubQ
 
+from os import environ
+
 from pyanaconda.anaconda_loggers import get_module_logger
 log = get_module_logger(__name__)
 
@@ -175,7 +177,11 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
 
     @property
     def mandatory(self):
-        """Only mandatory if no admin user has been requested."""
+        """Only mandatory if no admin user has been requested
+           or if setting bootloader password is mandatory
+        """
+        if environ.get('ANACONDA_IS_NICKEL') is not None:
+            return True
         return not self._users_module.CheckAdminUserExists()
 
     def apply(self):
@@ -195,6 +201,7 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler)
         # we have a password - set it to kickstart data
 
         self._users_module.SetCryptedRootPassword(crypt_password(pw))
+        self._users_module.SaveRootPassword(pw)
 
         # clear any placeholders
         self.remove_placeholder_texts()

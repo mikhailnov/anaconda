@@ -32,6 +32,8 @@ from pyanaconda.modules.users.users_interface import UsersInterface
 from pyanaconda.modules.users.installation import SetRootPasswordTask, CreateUsersTask, \
     CreateGroupsTask, SetSshKeysTask, ConfigureRootPasswordSSHLoginTask
 
+import os
+
 from pyanaconda.anaconda_loggers import get_module_logger
 log = get_module_logger(__name__)
 
@@ -82,6 +84,7 @@ class UsersService(KickstartService):
         log.debug("Processing kickstart data...")
 
         self.set_root_password(data.rootpw.password, crypted=data.rootpw.isCrypted)
+        self.save_root_password(data.rootpw.password)
         self.set_root_account_locked(data.rootpw.lock)
         # make sure the root account is locked unless a password is set in kickstart
         if not data.rootpw.password:
@@ -419,3 +422,20 @@ class UsersService(KickstartService):
 
         # no admin user found
         return False
+    
+    def save_root_password(self, root_password):
+        if os.environ.get('ANACONDA_IS_NICKEL') is not None:
+            # XXX users module is started separately,
+            # but I need to copy root password to set it in Grub.
+            # Seems that there is no way to get it from storage module,
+            # let's write it into a file, not in the chroot, bot in the LiveCD to tmpfs.
+            if os.path.exists("/tmp/.anaconda-root-pwd"):
+                os.remove("/tmp/.anaconda-root-pwd")
+            umask_old = os.umask(0o022)
+            os.umask(0o0077)
+            root_pwd_file = open("/tmp/.anaconda-root-pwd", "w+")
+            root_pwd_file.write("%s" % root_password)
+            root_pwd_file.close()
+            os.umask(umask_old)
+        return os.path.exists("/tmp/.anaconda-root-pwd")
+

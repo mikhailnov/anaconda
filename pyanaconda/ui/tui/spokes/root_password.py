@@ -28,6 +28,7 @@ from pyanaconda.modules.common.constants.services import USERS, SERVICES
 
 from simpleline.render.widgets import TextWidget
 
+from os import environ
 
 class PasswordSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
     """
@@ -61,8 +62,12 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
 
     @property
     def mandatory(self):
-        """Root password spoke is mandatory if no users with admin rights have been requested."""
-        return self._users_module.CheckAdminUserExists()
+        """Only mandatory if no admin user has been requested
+           or if setting bootloader password is mandatory
+        """
+        if environ.get('ANACONDA_IS_NICKEL') is not None:
+            return True
+        return not self._users_module.CheckAdminUserExists()
 
     @property
     def status(self):
@@ -104,5 +109,6 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
 
     def apply(self):
         self._users_module.SetCryptedRootPassword(self._password)
+        self._users_module.SaveRootPassword(self._password)
         if self._password:
             self._users_module.SetRootAccountLocked(False)

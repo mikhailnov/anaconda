@@ -29,6 +29,10 @@ from pyanaconda.core.configuration.anaconda import conf
 from pyanaconda.core.i18n import _
 from pyanaconda.product import productName
 
+# to access root password
+import pyanaconda.modules.users.users as UsersService
+from os import environ
+
 from pyanaconda.anaconda_loggers import get_module_logger
 log = get_module_logger(__name__)
 
@@ -337,7 +341,18 @@ class GRUB2(BootLoader):
         self.write_config_console(None)
         # See if we have a password and if so update the boot args before we
         # write out the defaults file.
+        if not self.password and environ.get('ANACONDA_IS_NICKEL') is not None:
+            log.info("Setting Grub password equal to root password")
+            # XXX explained in users.py
+            root_pwd_file = open("/tmp/.anaconda-root-pwd", "r")
+            self.password = root_pwd_file.readline()
+            root_pwd_file.close()
+        # A user with admin capabilities can break the system,
+        # dracut will open a rescue shell and an unpreviliged user
+        # will be able to gain not only root access, but also bypass SELinux MLS
+        # because at this stage SELinux will not be working.
         if self.password or self.encrypted_password:
+            log.info("Adding rd.shell=0 to kernel cmdline to avoid violating restrictions")
             self.boot_args.add("rd.shell=0")
         self.write_defaults()
 
