@@ -18,6 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+#export ANACONDA_IS_NICKEL=1
+
 LIVE_INSTALL=0
 IMAGE_INSTALL=0
 
