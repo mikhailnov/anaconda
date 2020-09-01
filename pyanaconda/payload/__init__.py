@@ -524,28 +524,29 @@ class Payload(metaclass=ABCMeta):
 
         :returns: None
         """
-        if os.path.exists(conf.target.system_root + "/usr/sbin/new-kernel-pkg"):
-            use_dracut = False
-        else:
-            log.debug("new-kernel-pkg does not exist, using dracut instead.")
-            use_dracut = True
+        # new-kernel-pkg does not exist in ROSA
+        use_dracut = True
 
         for kernel in self.kernel_version_list:
             log.info("recreating initrd for %s", kernel)
             if not conf.target.is_image:
                 if use_dracut:
                     util.execInSysroot("depmod", ["-a", kernel])
+                    # ROSA uses initrd-xxx.img, not initramfs-xxx.img
+                    # (maybe migrate to initramfs? I'm fed up with patching this in various places...)
                     util.execInSysroot("dracut",
                                        ["-f",
-                                        "/boot/initramfs-%s.img" % kernel,
+                                        "/boot/initrd-%s.img" % kernel,
                                         kernel])
                 else:
+                    # XXX will never happen in ROSA
                     util.execInSysroot("new-kernel-pkg",
                                        ["--mkinitrd", "--dracut", "--depmod",
                                         "--update", kernel])
 
                 # if the installation is running in fips mode then make sure
                 # fips is also correctly enabled in the installed system
+                # XXX not available in ROSA
                 if kernel_arguments.get("fips") == "1":
                     # We use the --no-bootcfg option as we don't want fips-mode-setup to
                     # modify the bootloader configuration.
@@ -559,7 +560,7 @@ class Payload(metaclass=ABCMeta):
                 util.execInSysroot("dracut",
                                    ["-N",
                                     "--persistent-policy", "by-uuid",
-                                    "-f", "/boot/initramfs-%s.img" % kernel,
+                                    "-f", "/boot/initrd-%s.img" % kernel,
                                     kernel])
 
     def post_install(self):

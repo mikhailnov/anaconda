@@ -75,5 +75,5 @@ class LinuxBootLoaderImage(BootLoaderImage):
         """
         filename = self._initrd
         if self.version and not filename:
-            filename = "initramfs-%s.img" % self.version
+            filename = "initrd-%s.img" % self.version
         return filename

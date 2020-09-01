@@ -50,7 +50,8 @@ def configure_boot_loader(sysroot, storage, kernel_versions):
     _collect_os_images(storage, kernel_versions)
 
     # Write out /etc/sysconfig/kernel.
-    _write_sysconfig_kernel(sysroot, storage)
+    # XXX not used in ROSA
+    #_write_sysconfig_kernel(sysroot, storage)
 
 
 def _get_rescue_kernel_versions(sysroot):

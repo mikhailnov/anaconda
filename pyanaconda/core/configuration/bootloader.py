@@ -47,6 +47,10 @@ class BootloaderSection(Section):
     def efi_dir(self):
         """Name of the EFI directory."""
         return self._get_option("efi_dir", str)
+        # XXX configure it properly,
+        # for now patched anaconda.conf,
+        # rosa.conf has to be made
+        # ID=rosa in /etc/os-release => rosa.conf
 
     @property
     def menu_auto_hide(self):

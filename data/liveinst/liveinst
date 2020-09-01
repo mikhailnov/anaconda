@@ -21,6 +21,11 @@
 LIVE_INSTALL=0
 IMAGE_INSTALL=0
 
+# Make look and feel the same in all DEs.
+# This will also help to make screenshots in different manuals
+# be completely the same as the real look in different DEs.
+export GTK_THEME=Adwaita:light
+
 if [ -z "$LIVECMD" ]; then
     LIVE_INSTALL=1
 fi

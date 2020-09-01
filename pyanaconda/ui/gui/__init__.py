@@ -342,7 +342,12 @@ class ErrorDialog(GUIObject):
 class MainWindow(Gtk.Window):
     """This is a top-level, full size window containing the Anaconda screens."""
 
-    def __init__(self, fullscreen=False, decorated=False):
+    # Let's decorate the window properly in ROSA
+    # It is better because we run Anaconda in LiveCD in a DE session,
+    # window without decorations looks really strange
+    # But window is not resizable properly, only minimizing works properly
+    # XXX TODO: maybe off resizing...
+    def __init__(self, fullscreen=False, decorated=True):
         """Create a new anaconda main window.
 
           :param bool fullscreen: if True, fullscreen the window, if false maximize
@@ -351,12 +356,13 @@ class MainWindow(Gtk.Window):
 
         # Remove the title bar, resize controls and other stuff if the window manager
         # allows it and decorated is set to False. Otherwise, it has no effect.
-        self.set_decorated(decorated)
+        #self.set_decorated(decorated)
 
         # Hide the titlebar when maximized if the window manager allows it.
         # This makes anaconda look full-screenish but without covering parts
         # needed to interact with the window manager, like the GNOME top bar.
-        self.set_hide_titlebar_when_maximized(True)
+        # Off it in ROSA
+        self.set_hide_titlebar_when_maximized(False)
 
         # The Anaconda and Initial Setup windows might sometimes get decorated with
         # a titlebar which contains the __init__.py header text by default.
@@ -366,7 +372,9 @@ class MainWindow(Gtk.Window):
 
         # Set the icon used in the taskbar of window managers that have a taskbar
         # The "org.fedoraproject.AnacondaInstaller" icon is part of fedora-logos
-        self.set_icon_name("org.fedoraproject.AnacondaInstaller")
+        # "anaconda-rosa" is a ROSA-specific icon,
+        # the same as used in the ROSA-specific desktop file
+        self.set_icon_name("anaconda-rosa")
 
         # Treat an attempt to close the window the same as hitting quit
         self.connect("delete-event", self._on_delete_event)

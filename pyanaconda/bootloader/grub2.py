@@ -21,6 +21,8 @@ from _ped import PARTITION_BIOS_GRUB
 
 from blivet.devicelibs import raid
 
+import shutil
+
 from pyanaconda.bootloader.base import BootLoader, BootLoaderError
 from pyanaconda.core import util
 from pyanaconda.core.configuration.anaconda import conf
@@ -100,7 +102,7 @@ class GRUB2(BootLoader):
     name = "GRUB2"
     # grub2 is a virtual provides that's provided by grub2-pc, grub2-ppc64le,
     # and all of the primary grub components that aren't grub2-efi-${EFIARCH}
-    packages = ["grub2", "grub2-tools"]
+    packages = ["grub2"]
     _config_file = "grub.cfg"
     _config_dir = "grub2"
     _passwd_file = "user.cfg"
@@ -110,6 +112,7 @@ class GRUB2(BootLoader):
 
     _device_map_file = "device.map"
     can_dual_boot = True
+    is_efi_grub = False
 
     stage2_is_valid_stage1 = True
     stage2_bootable = True
@@ -252,23 +255,35 @@ class GRUB2(BootLoader):
 
     def write_defaults(self):
         defaults_file = "%s%s" % (conf.target.system_root, self.defaults_file)
-        defaults = open(defaults_file, "w+")
-        defaults.write("GRUB_TIMEOUT=%d\n" % self.timeout)
-        defaults.write("GRUB_DISTRIBUTOR=\"$(sed 's, release .*$,,g' /etc/system-release)\"\n")
-        defaults.write("GRUB_DEFAULT=saved\n")
-        defaults.write("GRUB_DISABLE_SUBMENU=true\n")
+        # Try to avoid loosing what %posttrans of grub2-theme-rosa added to /etc/default/grub
+        # and so append (a+) the file instead of overwriting it (w+)
+        # Minimize number of appended config options
+        # Take /etc/default/grub from LiveCD, it a ready to use config with ROSA theme already inside it,
+        # and append some options to it
+        if not shutil.copyfile("%s" % self.defaults_file, "%s" % defaults_file):
+            log.error("Error copying Grub config from LiveCD to the target system!")
+        defaults = open(defaults_file, "a+")
+        #defaults.write("GRUB_TIMEOUT=%d\n" % self.timeout)
+        #defaults.write("GRUB_DISTRIBUTOR=\"$(sed 's, release .*$,,g' /etc/system-release)\"\n")
+        #defaults.write("GRUB_DEFAULT=saved\n")
+        #defaults.write("GRUB_DISABLE_SUBMENU=true\n")
+
+        # XXX TODO: are _CONSOLE_ options really needed? Probably are useful
         if self.console and self.has_serial_console:
             defaults.write("GRUB_TERMINAL=\"serial console\"\n")
             defaults.write("GRUB_SERIAL_COMMAND=\"%s\"\n" % self.serial_command)
-        else:
-            defaults.write("GRUB_TERMINAL_OUTPUT=\"%s\"\n" % self.terminal_type)
+        # XXX GRUB_TERMINAL_OUTPUT=console offs Grub theme
+        #else:
+        #    defaults.write("GRUB_TERMINAL_OUTPUT=\"%s\"\n" % self.terminal_type)
 
         # this is going to cause problems for systems containing multiple
         # linux installations or even multiple boot entries with different
         # boot arguments
         log.info("bootloader.py: used boot args: %s ", self.boot_args)
+        # XXX probably it's useful to save e.g. nomodset if OS can't be booted otherwise
         defaults.write("GRUB_CMDLINE_LINUX=\"%s\"\n" % self.boot_args)
-        defaults.write("GRUB_DISABLE_RECOVERY=\"true\"\n")
+        # XXX what is this?
+        #defaults.write("GRUB_DISABLE_RECOVERY=\"true\"\n")
         #defaults.write("GRUB_THEME=\"/boot/grub2/themes/system/theme.txt\"\n")
 
         if self.use_bls and os.path.exists(conf.target.system_root + "/usr/sbin/new-kernel-pkg"):
@@ -358,6 +373,10 @@ class GRUB2(BootLoader):
                 log.error("failed to set menu_auto_hide=1")
 
         # now tell grub2 to generate the main configuration file
+        # Do not make /boot/efi/EFI/rosa/grub.cfg here
+        if self.is_efi_grub:
+            log.info("bootloader.py: skipping grub2-mkconfig in EFI mode")
+            return
         rc = util.execInSysroot("grub2-mkconfig",
                                 ["-o", self.config_file])
         if rc:
@@ -425,6 +444,7 @@ class GRUB2(BootLoader):
                 else:
                     log.info("bootloader.py: mbr will be updated for grub2")
 
+            log.info("bootloader.py: installing grub2 in non-EFI mode")
             rc = util.execWithRedirect("grub2-install", grub_args,
                                        root=conf.target.system_root,
                                        env_prune=['MALLOC_PERTURB_'])
