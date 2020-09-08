@@ -68,7 +68,6 @@ WORKSTATION_PARTITIONING = [
     PartSpec(
         mountpoint="/home",
         size=Size("500MiB"), grow=True,
-        required_space=Size("50GiB"),
         btr=True,
         lv=True,
         thin=True,
