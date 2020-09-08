@@ -62,6 +62,8 @@ gi.require_version("Gdk", "3.0")
 gi.require_version("AnacondaWidgets", "3.3")
 from gi.repository import Gdk, AnacondaWidgets, Gtk
 
+import os
+
 log = get_module_logger(__name__)
 
 __all__ = ["StorageSpoke"]
@@ -271,6 +273,10 @@ class StorageSpoke(NormalSpoke, StorageCheckHandler):
             self._partitioning_request = PartitioningRequest.from_structure(
                 self._partitioning.Request
             )
+
+        if os.environ.get('ANACONDA_IS_NICKEL') is not None:
+            self._partitioning_request.excluded_mount_points.append("swap")
+            log.info("Swap is not created on certified distributions because wiping information from there cannot be guaranteed.")
 
         # Get the UI elements.
         self._auto_part_radio_button = self.builder.get_object("autopartRadioButton")

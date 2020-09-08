@@ -32,6 +32,8 @@ from pyanaconda.modules.storage.partitioning.constants import PartitioningMethod
 from pyanaconda.modules.storage.partitioning.automatic.automatic_partitioning import \
     AutomaticPartitioningTask
 
+import os
+
 log = get_module_logger(__name__)
 
 
@@ -73,7 +75,7 @@ class AutoPartitioningModule(PartitioningModule):
         if data.autopart.nohome:
             request.excluded_mount_points.append("/home")
 
-        if data.autopart.noswap:
+        if data.autopart.noswap or os.environ.get('ANACONDA_IS_NICKEL') is not None:
             request.excluded_mount_points.append("swap")
 
         if data.autopart.encrypted:
