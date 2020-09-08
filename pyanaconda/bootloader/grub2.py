@@ -482,11 +482,11 @@ class GRUB2(BootLoader):
             self.write_device_map()
             self.stage2_device.format.sync(root=conf.target.physical_root)
             os.sync()
+            self.write_config()
             self.install()
             os.sync()
             self.stage2_device.format.sync(root=conf.target.physical_root)
         finally:
-            self.write_config()
             os.sync()
             self.stage2_device.format.sync(root=conf.target.physical_root)
 
