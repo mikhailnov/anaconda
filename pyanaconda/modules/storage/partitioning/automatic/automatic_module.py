@@ -18,6 +18,7 @@
 # Red Hat, Inc.
 #
 import copy
+import os
 
 from pyanaconda.anaconda_loggers import get_module_logger
 from pyanaconda.core.configuration.anaconda import conf
@@ -72,8 +73,8 @@ class AutoPartitioningModule(PartitioningModule):
 
         if data.autopart.nohome:
             request.excluded_mount_points.append("/home")
-
-        if data.autopart.noswap:
+            
+        if data.autopart.noswap or os.environ.get('ANACONDA_IS_NICKEL') is not None:
             request.excluded_mount_points.append("swap")
 
         if data.autopart.encrypted:
