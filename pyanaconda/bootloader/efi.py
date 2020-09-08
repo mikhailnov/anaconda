@@ -117,9 +117,9 @@ class EFIBase(object):
         try:
             os.sync()
             self.stage2_device.format.sync(root=conf.target.physical_root) # pylint: disable=no-member
-            self.install()
+            self.write_config()
         finally:
-            self.write_config()  # pylint: disable=no-member
+            self.install()  # pylint: disable=no-member
 
     def check(self):
         return True
