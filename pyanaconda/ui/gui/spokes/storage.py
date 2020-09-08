@@ -17,6 +17,7 @@
 # Red Hat, Inc.
 #
 import sys
+import os
 
 from blivet.size import Size
 from pyanaconda.anaconda_loggers import get_module_logger
@@ -130,6 +131,10 @@ class StorageSpoke(NormalSpoke, StorageCheckHandler):
             self._partitioning_request = PartitioningRequest.from_structure(
                 self._partitioning.Request
             )
+
+        if os.environ.get('ANACONDA_IS_NICKEL') is not None:
+            self._partitioning_request.excluded_mount_points.append("swap")
+            log.info("Swap is not created on certified distributions because wiping information from there cannot be guaranteed.")
 
         # Get the UI elements.
         self._custom_part_radio_button = self.builder.get_object("customRadioButton")

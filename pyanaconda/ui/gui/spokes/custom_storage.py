@@ -26,6 +26,7 @@
 # - Implement striping and mirroring for LVM.
 # - Activating reformat should always enable resize for existing devices.
 import copy
+import os
 
 from dasbus.client.proxy import get_object_path
 from dasbus.structure import compare_data
@@ -1465,6 +1466,9 @@ class CustomPartitioningSpoke(NormalSpoke, StorageCheckHandler):
         try:
             # Schedule the partitioning.
             log.debug("Running automatic partitioning.")
+            if os.environ.get('ANACONDA_IS_NICKEL') is not None:
+                request.excluded_mount_points.append("swap")
+                log.info("Swap is not created on certified distributions because wiping information from there cannot be guaranteed.")
             task_path = self._device_tree.SchedulePartitionsWithTask(
                 PartitioningRequest.to_structure(request)
             )
