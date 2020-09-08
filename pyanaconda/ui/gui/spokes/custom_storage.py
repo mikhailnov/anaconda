@@ -78,6 +78,8 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, Gtk
 
+import os
+
 log = get_module_logger(__name__)
 
 __all__ = ["CustomPartitioningSpoke"]
@@ -1441,6 +1443,9 @@ class CustomPartitioningSpoke(NormalSpoke, StorageCheckHandler):
         try:
             # Schedule the partitioning.
             log.debug("Running automatic partitioning.")
+            if os.environ.get('ANACONDA_IS_NICKEL') is not None:
+                request.excluded_mount_points.append("swap")
+                log.info("Swap is not created on certified distributions because wiping information from there cannot be guaranteed.")
             task_path = self._device_tree.SchedulePartitionsWithTask(
                 PartitioningRequest.to_structure(request)
             )
