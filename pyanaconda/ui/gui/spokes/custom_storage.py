@@ -782,8 +782,8 @@ class CustomPartitioningSpoke(NormalSpoke, StorageCheckHandler):
         fancy_set_sensitive(self._reformatCheckbox, self._permissions.reformat)
 
         # Set up the encryption.
-        self._encryptCheckbox.set_active(self._request.device_encrypted)
-        fancy_set_sensitive(self._encryptCheckbox, self._permissions.device_encrypted)
+        self._encryptCheckbox.set_active(False)
+        fancy_set_sensitive(self._encryptCheckbox, False)
 
         self._encryptCheckbox.set_inconsistent(self._request.container_encrypted)
         text = _("The container is encrypted.") if self._request.container_encrypted else ""
@@ -1252,7 +1252,7 @@ class CustomPartitioningSpoke(NormalSpoke, StorageCheckHandler):
             if request.container_encrypted:
                 self._encryptCheckbox.set_active(False)
 
-            fancy_set_sensitive(self._encryptCheckbox, self._permissions.device_encrypted)
+            fancy_set_sensitive(self._encryptCheckbox, False)
             self._update_luks_combo()
 
         # Update the UI.
@@ -1476,7 +1476,7 @@ class CustomPartitioningSpoke(NormalSpoke, StorageCheckHandler):
         self._update_permissions()
 
         # Update the UI.
-        fancy_set_sensitive(self._encryptCheckbox, self._permissions.device_encrypted)
+        fancy_set_sensitive(self._encryptCheckbox, False)
         self._update_luks_combo()
         fancy_set_sensitive(self._fsCombo, self._permissions.format_type)
         self.on_value_changed()

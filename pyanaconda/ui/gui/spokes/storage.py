@@ -297,6 +297,9 @@ class StorageSpoke(NormalSpoke, StorageCheckHandler):
         # Configure the partitioning methods.
         self._configure_partitioning_methods()
 
+        # disable disk encryption
+        self._encryption_revealer.set_reveal_child(False)
+
     def _configure_partitioning_methods(self):
         if "CustomPartitioningSpoke" in conf.ui.hidden_spokes:
             self._custom_part_radio_button.set_visible(False)
@@ -333,9 +336,7 @@ class StorageSpoke(NormalSpoke, StorageCheckHandler):
         # as Blivet GUI handles encryption per encrypted device, not globally.
         # Hide it also for the interactive partitioning as CustomPartitioningSpoke
         # provides support for encryption of mount points.
-        self._encryption_revealer.set_reveal_child(
-            current_partitioning_method == PARTITIONING_METHOD_AUTOMATIC
-        )
+        self._encryption_revealer.set_reveal_child(False)
 
         # Hide the reclaim space checkbox if automatic storage configuration is not used.
         self._reclaim_revealer.set_reveal_child(
