@@ -275,3 +275,7 @@ class UserData(DBusData):
             self._groups.append("wheel")
         elif not admin and "wheel" in self._groups:
             self._groups.remove("wheel")
+
+    def add_group(self, group):
+        if group not in self._groups:
+            self._groups.append(group)

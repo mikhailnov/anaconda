@@ -40,7 +40,17 @@ def get_user_list(users_module, add_default=False, add_if_not_empty=False):
         # we only add default user to an empty list, to add default user to
         # a populated list the add_if_not_empty option needs to be used
         if not user_data_list or add_if_not_empty:
-            user_data_list.insert(0, UserData())
+            gd = UserData()
+            # ROSA has group "users" by default in /etc/group from the RPM package "setup"
+            # We want all "human" users to be in it to easify identifying them
+            # (this group was historically used in drakxtools, let's continue using it).
+            # Note that this does not touch users created in kickstart files: they may have special purposes,
+            # let the author of kickstarts decide. Here we work only with the user created by the installer.
+            gd.add_group('users')
+            # We want the first user to be an administrator by default.
+            # A special checkbox may be unchecked during installation.
+            gd.add_group('wheel')
+            user_data_list.insert(0, gd)
 
     return user_data_list
 
