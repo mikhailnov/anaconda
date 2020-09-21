@@ -174,7 +174,7 @@ class AddLayoutDialog(GUIObject):
         self._confirmAddButton.emit("clicked")
 
     def _addLayout(self, name, store):
-        store.append([name])
+        store.insert(0, [name])
 
 
 class ConfigureSwitchingDialog(GUIObject):
@@ -412,8 +412,6 @@ class KeyboardSpoke(NormalSpoke):
         buf = self.builder.get_object("layoutTestBuffer")
         buf.set_text("")
 
-        # Clear and repopulate addedLayoutStore with values from the module data
-        self._store.clear()
         self._add_data_layouts()
 
         # Start with no buttons enabled, since nothing is selected.
@@ -429,8 +427,11 @@ class KeyboardSpoke(NormalSpoke):
         if conf.system.can_configure_keyboard:
             self._xkl_wrapper.add_layout(name)
 
-        # valid layout, append it to the store
-        store.append([name])
+        # valid layout, insert it to the store
+        layouts = [lang[0] for lang in store]
+        # Avoid changing order on each run of the keyboard spoke
+        if name not in layouts:
+            store.insert(0, [name])
 
     def _removeLayout(self, store, itr):
         """
