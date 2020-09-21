@@ -18,6 +18,7 @@
 from blivet.partitioning import do_partitioning, grow_lvm
 from blivet.size import Size
 from blivet.static_data import luks_data
+import os
 
 from pyanaconda.anaconda_loggers import get_module_logger
 from pyanaconda.core.configuration.anaconda import conf
@@ -80,6 +81,27 @@ WORKSTATION_PARTITIONING = [
     )
 ]
 
+# For certified distros, without swap
+# TODO: move to product-specific nickel.conf
+NICKEL_PARTITIONING = [
+    PartSpec(
+        mountpoint="/",
+        size=Size("1GiB"),
+        max_size=Size("70GiB"),
+        grow=True,
+        btr=True,
+        lv=True,
+        thin=True,
+        encrypted=True),
+    PartSpec(
+        mountpoint="/home",
+        size=Size("500MiB"), grow=True,
+        btr=True,
+        lv=True,
+        thin=True,
+        encrypted=True),
+]
+
 
 def get_default_partitioning(partitioning_type=None):
     """Get the default partitioning requests.
@@ -89,6 +111,9 @@ def get_default_partitioning(partitioning_type=None):
     """
     if not partitioning_type:
         partitioning_type = conf.storage.default_partitioning
+
+    if os.environ.get('ANACONDA_IS_NICKEL') is not None:
+        return platform.set_default_partitioning() + NICKEL_PARTITIONING
 
     if partitioning_type is PartitioningType.SERVER:
         return platform.set_default_partitioning() + SERVER_PARTITIONING
