@@ -138,7 +138,7 @@ def start_x11(xtimeout):
 
     # Start Xorg and wait for it become ready
     util.startX(["Xorg", "-br", "-logfile", "/tmp/X.log",
-                 ":%s" % constants.X_DISPLAY_NUMBER, "vt6", "-s", "1440", "-ac",
+                 ":%s" % constants.X_DISPLAY_NUMBER, "vt8", "-s", "1440", "-ac",
                  "-nolisten", "tcp", "-dpi", "96",
                  "-noreset"],
                 output_redirect=subprocess.DEVNULL, timeout=xtimeout)
