@@ -64,7 +64,11 @@ class LanguageInstallationTask(Task):
             fpath = os.path.normpath(root + self.LOCALE_CONF_FILE_PATH)
 
             with open(fpath, "w") as fobj:
-                fobj.write('LANG="{}"\n'.format(lang))
+                for var in ['LANG', 'LC_ADDRESS', 'LC_COLLATE', 'LC_CTYPE', \
+                            'LC_IDENTIFICATION', 'LC_MEASUREMENT', 'LC_MESSAGES', 'LC_MONETARY', \
+                            'LC_NAME', 'LC_NUMERIC', 'LC_PAPER', 'LC_TELEPHONE', 'LC_TIME']:
+                                fobj.write('%s="%s"\n' % (var, lang))
+                                # LANGUAGE=ru_RU.UTF-8:ru
 
         except IOError as ioerr:
             msg = "Cannot write language configuration file: {}".format(ioerr.strerror)
