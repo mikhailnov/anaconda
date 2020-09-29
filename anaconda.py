@@ -264,6 +264,14 @@ if __name__ == "__main__":
     from pyanaconda.core.kernel import kernel_arguments
     (opts, depr) = parse_arguments(boot_cmdline=kernel_arguments)
 
+    # XXX ROSA hack
+    livecd_install = True
+    if opts.ksfile:
+        livecd_install = False
+    if livecd_install:
+        opts.ksfile='/usr/share/anaconda/anaconda-livecd-text.ks'
+    #/
+
     from pyanaconda.core.configuration.anaconda import conf
     conf.set_from_opts(opts)
 
