@@ -133,10 +133,7 @@ class Platform(object):
 
         :return: a specification or None
         """
-        return PartSpec(
-            mountpoint="/boot",
-            size=Size("1GiB")
-        )
+        return None
 
 
 class X86(Platform):
