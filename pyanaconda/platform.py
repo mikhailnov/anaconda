@@ -104,7 +104,11 @@ class Platform(object):
 
     def set_platform_boot_partition(self):
         """Return the default /boot partition for this platform."""
-        return [PartSpec(mountpoint="/boot", size=Size("1GiB"))]
+        #return [PartSpec(mountpoint="/boot", size=Size("1GiB"))]
+        # Separate /boot is not necessary for Grub2, https://askubuntu.com/a/76109
+        # We do not support other bootloaders for x86/ARM, but bellow
+        # a separate /boot partition is foced for s390x, ppc64 etc.
+        return []
 
     def set_default_partitioning(self):
         """Return the default platform-specific partitioning information."""
