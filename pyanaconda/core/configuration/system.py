@@ -135,7 +135,8 @@ class SystemSection(Section):
     @property
     def can_configure_network(self):
         """Can we configure the network?"""
-        return self._is_boot_iso or self._is_booted_os
+        #return self._is_boot_iso or self._is_booted_os
+        return True
 
     @property
     def can_detect_unsupported_hardware(self):
