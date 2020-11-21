@@ -40,7 +40,7 @@ class TimezoneService(KickstartService):
     def __init__(self):
         super().__init__()
         self.timezone_changed = Signal()
-        self._timezone = "America/New_York"
+        self._timezone = "Europe/Moscow"
 
         self.is_utc_changed = Signal()
         self._is_utc = False

@@ -63,8 +63,8 @@ class ConfigureTimezoneTask(Task):
         if not is_valid_timezone(self._timezone):
             # this should never happen, but for pity's sake
             log.warning("Timezone %s set in kickstart is not valid, "
-                        "falling back to default (America/New_York).", self._timezone)
-            self._timezone = "America/New_York"
+                        "falling back to default (Europe/Moscow).", self._timezone)
+            self._timezone = "Europe/Moscow"
 
     def _make_timezone_symlink(self):
         """Create the symlink that actually defines timezone."""

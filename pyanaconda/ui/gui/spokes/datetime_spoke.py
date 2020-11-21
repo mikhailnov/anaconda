@@ -65,7 +65,7 @@ SERVER_POOL = 1
 SERVER_WORKING = 2
 SERVER_USE = 3
 
-DEFAULT_TZ = "America/New_York"
+DEFAULT_TZ = "Europe/Moscow"
 
 SPLIT_NUMBER_SUFFIX_RE = re.compile(r'([^0-9]*)([-+])([0-9]+)')
 
