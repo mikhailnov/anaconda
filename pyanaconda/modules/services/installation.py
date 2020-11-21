@@ -239,16 +239,8 @@ class ConfigureSystemdDefaultTargetTask(Task):
         if not self._default_target:
             self._default_target = TEXT_ONLY_TARGET
 
-        log.debug("Setting systemd default target to: %s", self._default_target)
-        default_target_path = os.path.join(self._sysroot, 'etc/systemd/system/default.target')
-        # unlink any links already in place
-        if os.path.islink(default_target_path):
-            os.unlink(default_target_path)
-        # symlink the selected target
-        selected_target_path = os.path.join('/usr/lib/systemd/system', self._default_target)
-        log.debug("Linking %s as systemd default target.", selected_target_path)
-        os.symlink(selected_target_path, default_target_path)
-
+        # XXX No need to make default target, it is rsync'ed correctly from LiveCD
+        # /etc/systemd/system/default.target does not exist by default, and everything is OK
 
 class ConfigureDefaultDesktopTask(Task):
     """Installation task for configuring the default desktop."""

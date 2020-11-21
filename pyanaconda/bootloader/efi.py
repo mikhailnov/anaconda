@@ -34,6 +34,11 @@ __all__ = ["EFIBase", "EFIGRUB", "Aarch64EFIGRUB", "ArmEFIGRUB", "MacEFIGRUB"]
 class EFIBase(object):
     """A base class for EFI-based boot loaders."""
 
+    # In ROSA, the main Grub2 config is /boot/grub2/grub.cfg,
+    # and the one by the path bellow just sets some variables and reuses it;
+    # it is done by a patch in Grub2; grub2-instyall is executed to make
+    # the config by the path bellow
+    # But this variable is used bellow... So not removing it
     @property
     def _config_dir(self):
         return "efi/EFI/{}".format(conf.bootloader.efi_dir)
@@ -43,6 +48,8 @@ class EFIBase(object):
             log.info("Skipping efibootmgr for image/directory install.")
             return ""
 
+        # XXX mostly useless in ROSA where Anaconda is patches to execute grub2-install
+        # which executes efibootmgr; this code just won't be run
         if "noefi" in kernel_arguments:
             log.info("Skipping efibootmgr for noefi")
             return ""
@@ -125,17 +132,20 @@ class EFIBase(object):
 
 class EFIGRUB(EFIBase, GRUB2):
     """EFI GRUBv2"""
-    _packages32 = [ "grub2-efi-ia32", "shim-ia32" ]
-    _packages_common = [ "efibootmgr", "grub2-tools" ]
+    # XXX ROSA does not support 32 bit UEFI now!!!
+    # We probably need to separate packages like Fedora
+    _packages32 = [ "grub2-efi", "shim" ]
+    _packages_common = [ "efibootmgr", "grub2" ]
     can_dual_boot = False
     stage2_is_valid_stage1 = False
     stage2_bootable = False
+    is_efi_grub = True
 
     _is_32bit_firmware = False
 
     def __init__(self):
         super().__init__()
-        self._packages64 = [ "grub2-efi-x64", "shim-x64" ]
+        self._packages64 = [ "grub2-efi", "shim" ]
 
         try:
             f = open("/sys/firmware/efi/fw_platform_size", "r")
@@ -150,23 +160,47 @@ class EFIGRUB(EFIBase, GRUB2):
     @property
     def _efi_binary(self):
         if self._is_32bit_firmware:
-            return "\\shimia32.efi"
-        return "\\shimx64.efi"
+            # XXX will it work?
+            return "\\BOOTia32.efi"
+        return "\\BOOTx64.efi"
 
     @property
     def packages(self):
+        # XXX EFI 32 will not work right now
         if self._is_32bit_firmware:
             return self._packages32 + self._packages_common
         return self._packages64 + self._packages_common
 
+    # In ROSA we do not want to follow the following, quote from Fedora wiki:
+    # https://fedoraproject.org/wiki/GRUB_2
+    # "grub2-install shouldn't be used on EFI systems. The grub2-efi package installs a prebaked grubx64.efi
+    # on the EFI System partition, which looks for grub.cfg on the ESP in /EFI/fedora/ whereas the grub2-install
+    # command creates a custom grubx64.efi, deletes the original installed one, and looks for grub.cfg in /boot/grub2/"
+    # We, as Ubuntu, patch Grub2 to keep the config in /boot/grub2/grub.cfg, and /boot/efi/EFI/rosa/grub.cfg
+    # is a super-minimal config which sets some params and loads /boot/grub2/grub.cfg
+    # grub2 is patched to make that minimal config, so we have to run grub2-install inside the chroot.
+    # Fedora does not run grub2-install at all, they just make a grub config and run efibootmgr.
+    # XXX Maybe move to a simpler Fedora/RH sheme and keep grub.cfg in /boot/efi/EFI/rosa/grub.cfg?!
+    # XXX /boot/grub2/grub.cfg will first be rsync'ed from LiveCD and then must be overwritten.
+    def install(self, args=None):
+        log.info("bootloader.py: installing grub2 in EFI mode")
+        rc = util.execInSysroot("grub2-install", [])
+        if rc:
+            raise BootLoaderError("Bootloader install (grub2-install) in EFI mode failed")
+        # update-grub2 is not an upstream script
+        rc = util.execInSysroot("update-grub2", [])
+        if rc:
+            raise BootLoaderError("Bootloader config update (update-grub2) in EFI mode failed")
+
 
 class Aarch64EFIGRUB(EFIGRUB):
     _serial_consoles = ["ttyAMA", "ttyS"]
-    _efi_binary = "\\shimaa64.efi"
+    # XXX fix this name
+    _efi_binary = "\\BOOTAA64.efi"
 
     def __init__(self):
         super().__init__()
-        self._packages64 = ["grub2-efi-aa64", "shim-aa64"]
+        self._packages64 = ["grub2-efi", "shim"]
 
 
 class ArmEFIGRUB(EFIGRUB):
@@ -175,14 +209,15 @@ class ArmEFIGRUB(EFIGRUB):
 
     def __init__(self):
         super().__init__()
-        self._packages32 = ["grub2-efi-arm"]
+        self._packages32 = ["grub2-efi"]
         self._is_32bit_firmware = True
 
 
 class MacEFIGRUB(EFIGRUB):
+    # XXX not supported in ROSA (?)
     def __init__(self):
         super().__init__()
-        self._packages64.extend(["grub2-tools-efi", "mactel-boot"])
+        self._packages64.extend(["grub2", "mactel-boot"])
 
     def mactel_config(self):
         if os.path.exists(conf.target.system_root + "/usr/libexec/mactel-boot-setup"):
