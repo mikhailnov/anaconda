@@ -35,7 +35,12 @@
  */
 
 /* change value below to make sidebar bigger / smaller */
-#define STANDALONE_SIDEBAR_WIDTH_PCT    (0.15)
+/* XXX The sidebar is currently empty in ROSA
+ * There is no need to waste screen space with it
+ * Let's improve experience on small screens by removing this sidebar
+ * It should be better done via CSS, but seems that it is hardcoded...
+ * Draw just a small colored line instead of a wide sidebar for now */
+#define STANDALONE_SIDEBAR_WIDTH_PCT    (0.01)
 
 enum {
     SIGNAL_QUIT_CLICKED,
