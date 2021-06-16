@@ -52,7 +52,7 @@ class NMClientTestCase(unittest.TestCase):
         return objects
 
     @patch("pyanaconda.modules.network.nm_client.get_iface_from_connection")
-    def get_slaves_from_connections_test(self, get_iface_from_connection):
+    def test_get_slaves_from_connections(self, get_iface_from_connection):
         nm_client = Mock()
 
         ENS3_UUID = "50f1ddc3-cfa5-441d-8afe-729213f5ca92"
@@ -127,7 +127,7 @@ class NMClientTestCase(unittest.TestCase):
     @patch("pyanaconda.modules.network.nm_client.get_connections_available_for_iface")
     @patch("pyanaconda.modules.network.nm_client.get_slaves_from_connections")
     @patch("pyanaconda.modules.network.nm_client.is_s390")
-    def get_dracut_arguments_from_connection_test(self, is_s390, get_slaves_from_connections_mock,
+    def test_get_dracut_arguments_from_connection(self, is_s390, get_slaves_from_connections_mock,
                                                   get_connections_available_for_iface):
         nm_client = Mock()
 
@@ -498,7 +498,7 @@ class NMClientTestCase(unittest.TestCase):
     @patch("pyanaconda.modules.network.nm_client.is_config_file_for_system")
     @patch("pyanaconda.modules.network.nm_client.get_iface_from_hwaddr")
     @patch("pyanaconda.modules.network.nm_client.is_s390")
-    def get_config_file_connection_of_device_test(self, is_s390, get_iface_from_hwaddr,
+    def test_get_config_file_connection_of_device(self, is_s390, get_iface_from_hwaddr,
                                                   is_config_file_for_system,
                                                   get_vlan_interface_name_from_connection):
         nm_client = Mock()
@@ -723,7 +723,7 @@ class NMClientTestCase(unittest.TestCase):
     @patch("pyanaconda.modules.network.nm_client.get_team_port_config_from_connection")
     @patch("pyanaconda.modules.network.nm_client.get_slaves_from_connections")
     @patch("pyanaconda.modules.network.nm_client.get_iface_from_connection")
-    def get_kicstart_network_data_test(self, get_iface_from_connection,
+    def test_get_kicstart_network_data(self, get_iface_from_connection,
                                        get_slaves_from_connections_mock,
                                        get_team_port_config_from_connection):
         """Test get_kickstart_network_data."""
@@ -983,3 +983,41 @@ class NMClientTestCase(unittest.TestCase):
             if generated_ks:
                 generated_ks = dedent(str(generated_ks)).strip()
             self.assertEqual(generated_ks, expected_ks)
+<<<<<<< HEAD
+=======
+
+    def test_update_connection_wired_settings_from_ksdata(self):
+        network_data = Mock()
+        connection = Mock()
+        wired_setting = Mock()
+
+        connection.get_setting_wired.return_value = wired_setting
+
+        # --mtu default value
+        network_data.mtu = ""
+        update_connection_wired_settings_from_ksdata(connection, network_data)
+        connection.get_setting_wired.assert_not_called()
+
+        # Invalid value
+        # --mtu=non-int
+        network_data.mtu = "non-int"
+        connection.reset_mock()
+        update_connection_wired_settings_from_ksdata(connection, network_data)
+        connection.get_setting_wired.assert_not_called()
+
+        # Valid value
+        # --mtu=9000
+        # The connection already has wired setting
+        connection.reset_mock()
+        network_data.mtu = "9000"
+        update_connection_wired_settings_from_ksdata(connection, network_data)
+        connection.get_setting_wired.assert_called_once()
+
+        # Valid value
+        # --mtu=9000
+        # The connection does not have wired setting yet
+        connection.get_setting_wired.return_value = None
+        connection.reset_mock()
+        update_connection_wired_settings_from_ksdata(connection, network_data)
+        connection.add_setting.assert_called_once()
+>>>>>>> d2085cdd22 (Rename all unit tests methods to use test_* prefix (#infra))
