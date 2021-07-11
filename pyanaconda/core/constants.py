@@ -72,7 +72,10 @@ ANACONDA_CONFIG_TMP = "/run/anaconda/anaconda.conf"
 # NOTE: this should be LANG_TERRITORY.CODESET, e.g. en_US.UTF-8
 DEFAULT_LANG = "en_US.UTF-8"
 
-DEFAULT_VC_FONT = "eurlatgr"
+# !!! kbd package has symlink to "default" font!
+# https://github.com/systemd/systemd/pull/15479
+# ^ it's still opened
+DEFAULT_VC_FONT = "default"
 
 DEFAULT_KEYBOARD = "us"
 
