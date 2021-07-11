@@ -99,7 +99,8 @@ def configure_boot_loader(sysroot, storage, kernel_versions):
     _collect_os_images(storage, kernel_versions)
 
     # Write out /etc/sysconfig/kernel.
-    _write_sysconfig_kernel(sysroot, storage)
+    # XXX not used in ROSA
+    # _write_sysconfig_kernel(sysroot, storage)
 
 
 def _get_rescue_kernel_versions(sysroot):
@@ -266,11 +267,12 @@ def recreate_initrds(sysroot, kernel_versions):
     :param sysroot: a path to the root of the installed system
     :param kernel_versions: a list of kernel versions
     """
-    if os.path.exists(sysroot + "/usr/sbin/new-kernel-pkg"):
-        use_dracut = False
-    else:
-        log.debug("new-kernel-pkg does not exist, using dracut instead")
-        use_dracut = True
+    # if os.path.exists(sysroot + "/usr/sbin/new-kernel-pkg"):
+    #     use_dracut = False
+    # else:
+    #     log.debug("new-kernel-pkg does not exist, using dracut instead")
+    #     use_dracut = True
+    use_dracut = True
 
     for kernel in kernel_versions:
         log.info("Recreating initrd for %s", kernel)
@@ -283,7 +285,7 @@ def recreate_initrds(sysroot, kernel_versions):
             execWithRedirect(
                 "dracut", [
                     "-N", "--persistent-policy", "by-uuid",
-                    "-f", "/boot/initramfs-%s.img" % kernel, kernel
+                    "-f", "/boot/initrd-%s.img" % kernel, kernel
                 ],
                 root=sysroot
             )
@@ -292,12 +294,15 @@ def recreate_initrds(sysroot, kernel_versions):
                 execWithRedirect(
                     "depmod", ["-a", kernel], root=sysroot
                 )
+                # ROSA uses initrd-xxx.img, not initramfs-xxx.img
+                # (maybe migrate to initramfs? I'm fed up with patching this in various places...)
                 execWithRedirect(
                     "dracut",
-                    ["-f", "/boot/initramfs-%s.img" % kernel, kernel],
+                    ["-f", "/boot/initrd-%s.img" % kernel, kernel],
                     root=sysroot
                 )
             else:
+                # XXX will never happen in ROSA
                 execWithRedirect(
                     "new-kernel-pkg",
                     ["--mkinitrd", "--dracut", "--depmod", "--update", kernel],
