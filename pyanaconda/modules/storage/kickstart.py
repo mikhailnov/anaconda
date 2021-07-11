@@ -72,7 +72,6 @@ class BTRFS(COMMANDS.BTRFS):
 
     def parse(self, args):
         """Parse the command."""
-        # pylint: disable=assignment-from-no-return
         retval = super().parse(args)
 
         # Check the file system type.
