@@ -65,7 +65,6 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
 
     def _check_dbus_property(self, *args, **kwargs):
         check_dbus_property(
-            self,
             SUBSCRIPTION,
             self.subscription_interface,
             *args, **kwargs
@@ -817,7 +816,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         observer.get_proxy.return_value = syspurpose_proxy
         # check the task is created correctly
         task_path = self.subscription_interface.SetSystemPurposeWithTask()
-        obj = check_task_creation(self, task_path, publisher, SystemPurposeConfigurationTask)
+        obj = check_task_creation(task_path, publisher, SystemPurposeConfigurationTask)
         # check the system purpose data got propagated to the module correctly
         data_from_module = obj.implementation._system_purpose_data
         expected_dict = {
@@ -1007,7 +1006,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
 
         # check the task is created correctly
         task_path = self.subscription_interface.SetRHSMConfigWithTask()
-        obj = check_task_creation(self, task_path, publisher, SetRHSMConfigurationTask)
+        obj = check_task_creation(task_path, publisher, SetRHSMConfigurationTask)
         # check all the data got propagated to the module correctly
         assert obj.implementation._rhsm_config_proxy == config_proxy
         task_request = obj.implementation._request
@@ -1076,7 +1075,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         self.assertEqual(obj.implementation._password, "foo_password")
 =======
         task_path = self.subscription_interface.RegisterAndSubscribeWithTask()
-        obj = check_task_creation(self, task_path, publisher, RegisterAndSubscribeTask)
+        obj = check_task_creation(task_path, publisher, RegisterAndSubscribeTask)
         # check all the data got propagated to the task correctly
         assert obj.implementation._rhsm_observer == rhsm_observer
         assert obj.implementation._subscription_request == subscription_request
@@ -1154,7 +1153,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         rhsm_unregister_proxy = observer.get_proxy.return_value
         # check the task is created correctly
         task_path = self.subscription_interface.UnregisterWithTask()
-        obj = check_task_creation(self, task_path, publisher, UnregisterTask)
+        obj = check_task_creation(task_path, publisher, UnregisterTask)
         # check all the data got propagated to the module correctly
 <<<<<<< HEAD
         self.assertEqual(obj.implementation._rhsm_unregister_proxy, rhsm_unregister_proxy)
@@ -1209,8 +1208,13 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         self.subscription_module._rhsm_observer = rhsm_observer
 >>>>>>> d2085cdd22 (Rename all unit tests methods to use test_* prefix (#infra))
         # check the task is created correctly
+<<<<<<< HEAD
         task_path = self.subscription_interface.AttachSubscriptionWithTask()
         obj = check_task_creation(self, task_path, publisher, AttachSubscriptionTask)
+=======
+        task_path = self.subscription_interface.UnregisterWithTask()
+        obj = check_task_creation(task_path, publisher, UnregisterTask)
+>>>>>>> f6b89486fb (Remove test classes for assert method calls (#infra))
         # check all the data got propagated to the module correctly
 <<<<<<< HEAD
         self.assertEqual(obj.implementation._rhsm_attach_proxy, rhsm_attach_proxy)
@@ -1305,7 +1309,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
             ConnectToInsightsTask
         ]
         task_paths = self.subscription_interface.InstallWithTasks()
-        task_objs = check_task_creation_list(self, task_paths, publisher, task_classes)
+        task_objs = check_task_creation_list(task_paths, publisher, task_classes)
 
         # RestoreRHSMDefaultsTask
         obj = task_objs[0]
@@ -1351,7 +1355,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
             ConnectToInsightsTask
         ]
         task_paths = self.subscription_interface.InstallWithTasks()
-        task_objs = check_task_creation_list(self, task_paths, publisher, task_classes)
+        task_objs = check_task_creation_list(task_paths, publisher, task_classes)
 
         # RestoreRHSMDefaultsTask
         obj = task_objs[0]
@@ -1385,7 +1389,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         self.subscription_module._rhsm_observer = observer
         syspurpose_proxy = Mock()
         observer.get_proxy.return_value = syspurpose_proxy
-        check_kickstart_interface(self, self.subscription_interface, ks_in, ks_out)
+        check_kickstart_interface(self.subscription_interface, ks_in, ks_out)
 
     def test_ks_out_no_kickstart(self):
         """Test with no kickstart."""
@@ -1619,7 +1623,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
 
         # check the task is created correctly
         task_path = self.subscription_interface.RetrieveOrganizationsWithTask()
-        obj = check_task_creation(self, task_path, publisher, RetrieveOrganizationsTask)
+        obj = check_task_creation(task_path, publisher, RetrieveOrganizationsTask)
         # check all the data got propagated to the module correctly
 <<<<<<< HEAD
         self.assertEqual(obj.implementation._rhsm_register_server_proxy, register_server_proxy)
