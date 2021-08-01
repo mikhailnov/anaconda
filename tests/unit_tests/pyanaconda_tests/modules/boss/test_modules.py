@@ -16,6 +16,7 @@
 # Red Hat, Inc.
 #
 import unittest
+import pytest
 from unittest.mock import Mock, patch
 
 from dasbus.constants import DBUS_START_REPLY_SUCCESS, DBUS_FLAG_NONE
@@ -48,7 +49,7 @@ class ModuleManagerTestCase(unittest.TestCase):
         task._callbacks.put((None, fake_callbacks))
         observers = task.run()
 
-        self.assertEqual([o.service_name for o in observers], service_names)
+        assert [o.service_name for o in observers] == service_names
         return observers
 
     def test_start_no_modules(self):
@@ -86,8 +87,16 @@ class ModuleManagerTestCase(unittest.TestCase):
             "org.fedoraproject.Anaconda.Modules.C",
         ]
 
+<<<<<<< HEAD
         task = StartModulesTask(self._message_bus, service_names, addons_enabled=False)
         self._check_started_modules(task, service_names)
+=======
+        task = StartModulesTask(self._message_bus, service_names, [], [])
+        observers = self._check_started_modules(task, service_names)
+
+        for observer in observers:
+            assert observer.is_addon == False
+>>>>>>> 1f1d373da3 (Switch asserting to pytest solution (#infra))
 
     @patch("dasbus.client.observer.Gio")
     def test_start_addons(self, gio):
@@ -98,11 +107,38 @@ class ModuleManagerTestCase(unittest.TestCase):
             "org.fedoraproject.Anaconda.Addons.C"
         ]
 
+<<<<<<< HEAD
         bus_proxy = self._message_bus.proxy
         bus_proxy.ListActivatableNames.return_value = [
             *service_names,
             "org.fedoraproject.Anaconda.D",
             "org.fedoraproject.E",
+=======
+        task = StartModulesTask(self._message_bus, service_namespaces, [], [])
+        observers = self._check_started_modules(task, service_names)
+
+        for observer in observers:
+            assert observer.is_addon == True
+
+    @patch("dasbus.client.observer.Gio")
+    def test_start_modules_forbidden(self, gio):
+        """Try to start forbidden modules."""
+        service_namespaces = [
+            "org.fedoraproject.Anaconda.Modules.*",
+            "org.fedoraproject.Anaconda.Addons.*",
+            "org.fedoraproject.InitialSetup.Modules.*",
+        ]
+        forbidden_names = [
+            "org.fedoraproject.Anaconda.Modules.B",
+            "org.fedoraproject.Anaconda.Addons.C",
+            "org.fedoraproject.InitialSetup.*",
+        ]
+        service_names = [
+            "org.fedoraproject.Anaconda.Addons.A",
+            "org.fedoraproject.Anaconda.Addons.B",
+            "org.fedoraproject.Anaconda.Modules.A",
+            "org.fedoraproject.Anaconda.Modules.C",
+>>>>>>> 1f1d373da3 (Switch asserting to pytest solution (#infra))
         ]
 
         task = StartModulesTask(self._message_bus, [], addons_enabled=True)
@@ -127,11 +163,11 @@ class ModuleManagerTestCase(unittest.TestCase):
 
         task._callbacks.put((None, fake_callbacks))
 
-        with self.assertRaises(UnavailableModuleError) as cm:
+        with pytest.raises(UnavailableModuleError) as cm:
             task.run()
 
         expected = "Service org.fedoraproject.Anaconda.Modules.A has failed to start: Fake error!"
-        self.assertEqual(str(cm.exception), expected)
+        assert str(cm.value) == expected
 
     @patch("dasbus.client.observer.Gio")
     def test_start_addon_failed(self, gio):
@@ -160,12 +196,12 @@ class ModuleManagerTestCase(unittest.TestCase):
                 task._start_service_by_name_callback(call, observer)
 
         task._callbacks.put((None, fake_callbacks))
-        self.assertEqual(task.run(), [])
+        assert task.run() == []
 
     @patch("dasbus.client.observer.Gio")
     def test_get_service_names(self, gio):
         """Get service names of running modules."""
-        self.assertEqual(self._manager.get_service_names(), [])
+        assert self._manager.get_service_names() == []
 
         service_names = [
             "org.fedoraproject.Anaconda.Modules.A",
@@ -177,4 +213,4 @@ class ModuleManagerTestCase(unittest.TestCase):
         observers = self._check_started_modules(task, service_names)
 
         self._manager.set_module_observers(observers)
-        self.assertEqual(self._manager.get_service_names(), service_names)
+        assert self._manager.get_service_names() == service_names

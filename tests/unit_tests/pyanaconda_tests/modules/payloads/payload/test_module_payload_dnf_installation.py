@@ -39,7 +39,7 @@ class SetRPMMacrosTaskTestCase(unittest.TestCase):
 
     def _check_macros(self, task, mock_rpm, expected_macros):
         """Check that the expected macros are set up."""
-        self.assertEqual(task._macros, expected_macros)
+        assert task._macros == expected_macros
 
         calls = [call(*macro) for macro in expected_macros]
         mock_rpm.addMacro.assert_has_calls(calls)
@@ -139,7 +139,7 @@ class ImportRPMKeysTaskTestCase(unittest.TestCase):
                 task.run()
 
             msg = "No GPG keys to import."
-            self.assertTrue(any(map(lambda x: msg in x, cm.output)))
+            assert any(map(lambda x: msg in x, cm.output))
 
     def test_import_no_rpm(self):
         """Import GPG keys without installed rpm."""
@@ -150,7 +150,7 @@ class ImportRPMKeysTaskTestCase(unittest.TestCase):
                 task.run()
 
             msg = "Can not import GPG keys to RPM database"
-            self.assertTrue(any(map(lambda x: msg in x, cm.output)))
+            assert any(map(lambda x: msg in x, cm.output))
 
     @patch("pyanaconda.modules.payloads.payload.dnf.installation.util.execWithRedirect")
     def test_import_error(self, mock_exec):
@@ -165,7 +165,7 @@ class ImportRPMKeysTaskTestCase(unittest.TestCase):
                 task.run()
 
             msg = "Failed to import the GPG key."
-            self.assertTrue(any(map(lambda x: msg in x, cm.output)))
+            assert any(map(lambda x: msg in x, cm.output))
 
     @patch("pyanaconda.modules.payloads.payload.dnf.installation.util.execWithRedirect")
     def test_import_keys(self, mock_exec):
@@ -206,3 +206,77 @@ class ImportRPMKeysTaskTestCase(unittest.TestCase):
                 ["--import", "/etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-34-s390x"],
                 root=sysroot
             )
+<<<<<<< HEAD
+=======
+
+
+class UpdateDNFConfigurationTaskTestCase(unittest.TestCase):
+    """Test the UpdateDNFConfigurationTask class."""
+
+    @patch("pyanaconda.core.util.execWithRedirect")
+    def test_no_update(self, execute):
+        """Don't update the DNF configuration."""
+        with tempfile.TemporaryDirectory() as sysroot:
+            data = PackagesConfigurationData()
+
+            task = UpdateDNFConfigurationTask(sysroot, data)
+            task.run()
+
+            execute.assert_not_called()
+
+    @patch("pyanaconda.core.util.execWithRedirect")
+    def test_failed_update(self, execute):
+        """The update of the DNF configuration has failed."""
+        execute.return_value = 1
+
+        with tempfile.TemporaryDirectory() as sysroot:
+            data = PackagesConfigurationData()
+            data.multilib_policy = MULTILIB_POLICY_ALL
+
+            task = UpdateDNFConfigurationTask(sysroot, data)
+
+            with self.assertLogs(level="WARNING") as cm:
+                task.run()
+
+            msg = "Failed to update the DNF configuration (1)."
+            assert any(map(lambda x: msg in x, cm.output))
+
+    @patch("pyanaconda.core.util.execWithRedirect")
+    def test_error_update(self, execute):
+        """The update of the DNF configuration has failed."""
+        execute.side_effect = OSError("Fake!")
+
+        with tempfile.TemporaryDirectory() as sysroot:
+            data = PackagesConfigurationData()
+            data.multilib_policy = MULTILIB_POLICY_ALL
+
+            task = UpdateDNFConfigurationTask(sysroot, data)
+
+            with self.assertLogs(level="WARNING") as cm:
+                task.run()
+
+            msg = "Couldn't update the DNF configuration: Fake!"
+            assert any(map(lambda x: msg in x, cm.output))
+
+    @patch("pyanaconda.core.util.execWithRedirect")
+    def test_multilib_policy(self, execute):
+        """Update the multilib policy."""
+        execute.return_value = 0
+
+        with tempfile.TemporaryDirectory() as sysroot:
+            data = PackagesConfigurationData()
+            data.multilib_policy = MULTILIB_POLICY_ALL
+
+            task = UpdateDNFConfigurationTask(sysroot, data)
+            task.run()
+
+            execute.assert_called_once_with(
+                "dnf",
+                [
+                    "config-manager",
+                    "--save",
+                    "--setopt=multilib_policy=all",
+                ],
+                root=sysroot
+            )
+>>>>>>> 1f1d373da3 (Switch asserting to pytest solution (#infra))

@@ -73,9 +73,9 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
 
     def test_kickstart_properties(self):
         """Test kickstart properties."""
-        self.assertEqual(self.subscription_interface.KickstartCommands, ["syspurpose", "rhsm"])
-        self.assertEqual(self.subscription_interface.KickstartSections, [])
-        self.assertEqual(self.subscription_interface.KickstartAddons, [])
+        assert self.subscription_interface.KickstartCommands == ["syspurpose", "rhsm"]
+        assert self.subscription_interface.KickstartSections == []
+        assert self.subscription_interface.KickstartAddons == []
         self.callback.assert_not_called()
 
     def test_system_purpose_data(self):
@@ -97,7 +97,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         }
 
         # compare the two
-        self.assertEqual(SystemPurposeData.to_structure(system_purpose_data), expected_dict)
+        assert SystemPurposeData.to_structure(system_purpose_data) == expected_dict
 
         # feed it to the DBus interface
         self.subscription_interface.SetSystemPurposeData(
@@ -106,7 +106,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
 
         # compare the result with expected data
         output = self.subscription_interface.SystemPurposeData
-        self.assertEqual(output, expected_dict)
+        assert output == expected_dict
 
     def test_system_purpose_data_comparison(self):
         """Test SystemPurposeData instance equality comparison."""
@@ -135,24 +135,24 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         different_system_purpose_data.addons = ["different_a", "different_b", "different_c"]
 
         # same content should be considered the same
-        self.assertTrue(system_purpose_data == system_purpose_data_clone)
+        assert system_purpose_data == system_purpose_data_clone
 
         # different content should not be considered the same
-        self.assertFalse(system_purpose_data == different_system_purpose_data)
-        self.assertFalse(system_purpose_data_clone == different_system_purpose_data)
+        assert not (system_purpose_data == different_system_purpose_data)
+        assert not (system_purpose_data_clone == different_system_purpose_data)
 
         # comparing with something else than a SystemPurposeData instance should
         # not crash & always return False
-        self.assertNotEqual(system_purpose_data, "foo")
-        self.assertNotEqual(system_purpose_data, None)
-        self.assertNotEqual(system_purpose_data, object())
+        assert system_purpose_data != "foo"
+        assert system_purpose_data is not None
+        assert system_purpose_data != object()
 
     def test_system_purpose_data_helper(self):
         """Test the SystemPurposeData DBus structure data availability helper method."""
 
         # empty
         data = SystemPurposeData()
-        self.assertFalse(data.check_data_available())
+        assert not data.check_data_available()
 
         # full
         data = SystemPurposeData()
@@ -160,14 +160,14 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         data.sla = "bar"
         data.usage = "baz"
         data.addons = ["a", "b", "c"]
-        self.assertTrue(data.check_data_available())
+        assert data.check_data_available()
 
         # partially populated
         data = SystemPurposeData()
         data.role = "foo"
         data.usage = "baz"
         data.addons = ["a"]
-        self.assertTrue(data.check_data_available())
+        assert data.check_data_available()
 
     def test_set_system_purpose(self):
         """Test if setting system purpose data from DBUS works correctly."""
@@ -186,10 +186,10 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         output_structure = self.subscription_interface.SystemPurposeData
         output_system_purpose_data = SystemPurposeData.from_structure(output_structure)
 
-        self.assertEqual(output_system_purpose_data.role, "foo")
-        self.assertEqual(output_system_purpose_data.sla, "bar")
-        self.assertEqual(output_system_purpose_data.usage, "baz")
-        self.assertEqual(output_system_purpose_data.addons, ["a", "b", "c"])
+        assert output_system_purpose_data.role == "foo"
+        assert output_system_purpose_data.sla == "bar"
+        assert output_system_purpose_data.usage == "baz"
+        assert output_system_purpose_data.addons == ["a", "b", "c"]
 
     def test_subscription_request_data_defaults(self):
         """Test the SubscriptionRequest DBus structure defaults."""
@@ -213,10 +213,8 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         }
 
         # compare the empty structure with expected default values
-        self.assertEqual(
-            get_native(SubscriptionRequest.to_structure(empty_request)),
+        assert get_native(SubscriptionRequest.to_structure(empty_request)) == \
             expected_default_dict
-        )
 
     def test_subscription_request_data_full(self):
         """Test completely populated SubscriptionRequest DBus structure."""
@@ -250,10 +248,8 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         }
 
         # compare the fully populated structure with expected values
-        self.assertEqual(
-            get_native(SubscriptionRequest.to_structure(full_request)),
+        assert get_native(SubscriptionRequest.to_structure(full_request)) == \
             expected_full_dict
-        )
 
         # set it to the module interface
         self.subscription_interface.SetSubscriptionRequest(
@@ -278,10 +274,8 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
             "server-proxy-password": {"type": SECRET_TYPE_HIDDEN, "value": ""},
         }
 
-        self.assertEqual(
-            output_dict,
+        assert output_dict == \
             expected_full_output_dict
-        )
 
     def test_set_subscription_request_password(self):
         """Test if setting username+password subscription request from DBUS works correctly."""
@@ -587,12 +581,12 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
 
         # check all three values are actually set to what we expect
         internal_request = self.subscription_module._subscription_request
-        self.assertEqual(internal_request.account_password.value,
-                         "bar_password")
-        self.assertEqual(internal_request.activation_keys.value,
-                         ["key_foo", "key_bar", "key_baz"])
-        self.assertEqual(internal_request.server_proxy_password.value,
-                         "foo_proxy_password")
+        assert internal_request.account_password.value == \
+            "bar_password"
+        assert internal_request.activation_keys.value == \
+            ["key_foo", "key_bar", "key_baz"]
+        assert internal_request.server_proxy_password.value == \
+            "foo_proxy_password"
 
         # set SubscriptionRequest on input with empty value
         # and type set to HIDDEN
@@ -644,12 +638,12 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
 
         # check all three values are actually still set to what we expect
         internal_request = self.subscription_module._subscription_request
-        self.assertEqual(internal_request.account_password.value,
-                         "bar_password")
-        self.assertEqual(internal_request.activation_keys.value,
-                         ["key_foo", "key_bar", "key_baz"])
-        self.assertEqual(internal_request.server_proxy_password.value,
-                         "foo_proxy_password")
+        assert internal_request.account_password.value == \
+            "bar_password"
+        assert internal_request.activation_keys.value == \
+            ["key_foo", "key_bar", "key_baz"]
+        assert internal_request.server_proxy_password.value == \
+            "foo_proxy_password"
 
     def test_attached_subscription_defaults(self):
         """Test the AttachedSubscription DBus structure defaults."""
@@ -668,10 +662,8 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
             "consumed-entitlement-count": get_variant(Int, 1)
         }
         # compare the empty structure with expected default values
-        self.assertEqual(
-            AttachedSubscription.to_structure(empty_request),
+        assert AttachedSubscription.to_structure(empty_request) == \
             expected_default_dict
-        )
 
     def test_attached_subscription_full(self):
         """Test the AttachedSubscription DBus structure that is fully populated."""
@@ -697,15 +689,13 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
             "consumed-entitlement-count": get_variant(Int, 9001)
         }
         # compare the full structure with expected values
-        self.assertEqual(
-            AttachedSubscription.to_structure(full_request),
+        assert AttachedSubscription.to_structure(full_request) == \
             expected_default_dict
-        )
 
     def test_insights_property(self):
         """Test the InsightsEnabled property."""
         # should be False by default
-        self.assertFalse(self.subscription_interface.InsightsEnabled)
+        assert not self.subscription_interface.InsightsEnabled
 
         # try setting the property
         self._check_dbus_property(
@@ -720,7 +710,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
     def test_registered_property(self):
         """Test the IsRegistered property."""
         # should be false by default
-        self.assertFalse(self.subscription_interface.IsRegistered)
+        assert not self.subscription_interface.IsRegistered
 
         # this property can't be set by client as it is set as the result of
         # subscription attempts, so we need to call the internal module interface
@@ -738,12 +728,12 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         )
 
         # at the end the property should be True
-        self.assertTrue(self.subscription_interface.IsRegistered)
+        assert self.subscription_interface.IsRegistered
 
     def test_subscription_attached_property(self):
         """Test the IsSubscriptionAttached property."""
         # should be false by default
-        self.assertFalse(self.subscription_interface.IsSubscriptionAttached)
+        assert not self.subscription_interface.IsSubscriptionAttached
 
         # this property can't be set by client as it is set as the result of
         # subscription attempts, so we need to call the internal module interface
@@ -761,12 +751,12 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         )
 
         # at the end the property should be True
-        self.assertTrue(self.subscription_interface.IsSubscriptionAttached)
+        assert self.subscription_interface.IsSubscriptionAttached
 
     def test_attached_subscriptions_property(self):
         """Test the AttachedSubscriptions property."""
         # should return an empty list by default
-        self.assertEqual(self.subscription_interface.AttachedSubscriptions, [])
+        assert self.subscription_interface.AttachedSubscriptions == []
         # this property can't be set by client as it is set as the result of
         # subscription attempts, so we need to call the internal module interface
         # via a custom setter
@@ -805,7 +795,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         )
         # at the end the property should return the expected list
         # of AttachedSubscription structures
-        self.assertEqual(self.subscription_interface.AttachedSubscriptions, subscription_structs)
+        assert self.subscription_interface.AttachedSubscriptions == subscription_structs
 
     @patch_dbus_publish_object
     def test_set_system_purpose_with_task(self, publisher):
@@ -836,7 +826,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
             "usage": get_variant(Str, "baz"),
             "addons": get_variant(List[Str], ["a", "b", "c"])
         }
-        self.assertEqual(SystemPurposeData.to_structure(data_from_module), expected_dict)
+        assert SystemPurposeData.to_structure(data_from_module) == expected_dict
 
     @patch("pyanaconda.modules.subscription.system_purpose.give_the_system_purpose")
     def test_apply_syspurpose(self, mock_give_purpose):
@@ -873,7 +863,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
     def test_get_rhsm_config_defaults(self):
         """Test the get_rhsm_config_defaults() method."""
         # cache should be None by default
-        self.assertIsNone(self.subscription_module._rhsm_config_defaults)
+        assert self.subscription_module._rhsm_config_defaults is None
 
         # create a default config
         default_config = {
@@ -922,14 +912,14 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         result2 = self.subscription_module.get_rhsm_config_defaults()
 
         # make sure the results are identical
-        self.assertEqual(result1, result2)
+        assert result1 == result2
 
         # make sure the results contain the expected dict
         # - even though GetAll() returns a variant, the
         #   get_rhsm_config_default() should convert it
         #   to a native Python dict
-        self.assertEqual(result1, flat_default_config)
-        self.assertEqual(result2, flat_default_config)
+        assert result1 == flat_default_config
+        assert result2 == flat_default_config
 
         # check the property requested the correct DBus object
         observer.get_proxy.assert_called_once_with(RHSM_CONFIG)
@@ -941,7 +931,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         """Test package requirements - module in default state."""
         # by default no packages should be required
         requirements = self.subscription_interface.CollectRequirements()
-        self.assertEqual(requirements, [])
+        assert requirements == []
 
     def test_package_requirements_insights(self):
         """Test package requirements - connect to Insights enabled."""
@@ -955,7 +945,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
              "reason": "Needed to connect the target system to Red Hat Insights.",
              "type": "package"}
         ]
-        self.assertEqual(get_native(requirements), expected_requirements)
+        assert get_native(requirements) == expected_requirements
 
     @patch_dbus_publish_object
     def test_set_rhsm_config_with_task(self, publisher):
@@ -1019,7 +1009,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         task_path = self.subscription_interface.SetRHSMConfigWithTask()
         obj = check_task_creation(self, task_path, publisher, SetRHSMConfigurationTask)
         # check all the data got propagated to the module correctly
-        self.assertEqual(obj.implementation._rhsm_config_proxy, config_proxy)
+        assert obj.implementation._rhsm_config_proxy == config_proxy
         task_request = obj.implementation._request
         expected_full_dict = {
             "type": SUBSCRIPTION_REQUEST_TYPE_ORG_KEY,
@@ -1034,10 +1024,8 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
             "activation-keys": {"type": SECRET_TYPE_TEXT, "value": ["key1", "key2", "key3"]},
             "server-proxy-password": {"type": SECRET_TYPE_TEXT, "value": "foo_proxy_password"},
         }
-        self.assertEqual(
-                get_native(SubscriptionRequest.to_structure(task_request)),
-                expected_full_dict)
-        self.assertEqual(obj.implementation._rhsm_config_defaults, flat_default_config)
+        assert get_native(SubscriptionRequest.to_structure(task_request)) == expected_full_dict
+        assert obj.implementation._rhsm_config_defaults == flat_default_config
 
     @patch_dbus_publish_object
 <<<<<<< HEAD
@@ -1079,12 +1067,38 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         self.subscription_module._system_purpose_data = system_purpose_data
 >>>>>>> d2085cdd22 (Rename all unit tests methods to use test_* prefix (#infra))
         # check the task is created correctly
+<<<<<<< HEAD
         task_path = self.subscription_interface.RegisterUsernamePasswordWithTask()
         obj = check_task_creation(self, task_path, publisher, RegisterWithUsernamePasswordTask)
         # check all the data got propagated to the module correctly
         self.assertEqual(obj.implementation._rhsm_register_server_proxy, register_server_proxy)
         self.assertEqual(obj.implementation._username, "foo_user")
         self.assertEqual(obj.implementation._password, "foo_password")
+=======
+        task_path = self.subscription_interface.RegisterAndSubscribeWithTask()
+        obj = check_task_creation(self, task_path, publisher, RegisterAndSubscribeTask)
+        # check all the data got propagated to the task correctly
+        assert obj.implementation._rhsm_observer == rhsm_observer
+        assert obj.implementation._subscription_request == subscription_request
+        assert obj.implementation._system_purpose_data == system_purpose_data
+        # pylint: disable=comparison-with-callable
+        assert obj.implementation._registered_callback == self.subscription_module.set_registered
+        # pylint: disable=comparison-with-callable
+        assert obj.implementation._registered_to_satellite_callback == \
+            self.subscription_module.set_registered_to_satellite
+        # pylint: disable=comparison-with-callable
+        assert obj.implementation._subscription_attached_callback == \
+            self.subscription_module.set_subscription_attached
+        # pylint: disable=comparison-with-callable
+        assert obj.implementation._subscription_data_callback == \
+            self.subscription_module._set_system_subscription_data
+        # pylint: disable=comparison-with-callable
+        assert obj.implementation._satellite_script_downloaded_callback == \
+            self.subscription_module._set_satellite_provisioning_script
+        # pylint: disable=comparison-with-callable
+        assert obj.implementation._config_backup_callback == \
+            self.subscription_module._set_pre_satellite_rhsm_conf_snapshot
+>>>>>>> 1f1d373da3 (Switch asserting to pytest solution (#infra))
         # trigger the succeeded signal
         obj.implementation.succeeded_signal.emit()
         # check this set the registered property to True
@@ -1142,12 +1156,24 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         task_path = self.subscription_interface.UnregisterWithTask()
         obj = check_task_creation(self, task_path, publisher, UnregisterTask)
         # check all the data got propagated to the module correctly
+<<<<<<< HEAD
         self.assertEqual(obj.implementation._rhsm_unregister_proxy, rhsm_unregister_proxy)
         # trigger the succeeded signal
         obj.implementation.succeeded_signal.emit()
         # check this set the subscription-attached & registered properties to False
         self.assertFalse(self.subscription_interface.IsRegistered)
         self.assertFalse(self.subscription_interface.IsSubscriptionAttached)
+=======
+        assert obj.implementation._rhsm_observer == rhsm_observer
+        assert obj.implementation._registered_to_satellite is False
+        assert obj.implementation._rhsm_configuration == {}
+        # trigger the succeeded signal
+        obj.implementation.succeeded_signal.emit()
+        # check this set the subscription-attached & registered properties to False
+        assert self.subscription_interface.IsRegistered is False
+        assert self.subscription_interface.IsRegisteredToSatellite is False
+        assert self.subscription_interface.IsSubscriptionAttached is False
+>>>>>>> 1f1d373da3 (Switch asserting to pytest solution (#infra))
 
     @patch_dbus_publish_object
 <<<<<<< HEAD
@@ -1186,6 +1212,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         task_path = self.subscription_interface.AttachSubscriptionWithTask()
         obj = check_task_creation(self, task_path, publisher, AttachSubscriptionTask)
         # check all the data got propagated to the module correctly
+<<<<<<< HEAD
         self.assertEqual(obj.implementation._rhsm_attach_proxy, rhsm_attach_proxy)
         self.assertEqual(obj.implementation._sla, "bar")
         # trigger the succeeded signal
@@ -1248,6 +1275,19 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         # check this set attached subscription and system purpose as expected
         self.assertEqual(self.subscription_interface.AttachedSubscriptions, subscription_structs)
         self.assertEqual(self.subscription_interface.SystemPurposeData, system_purpose_struct)
+=======
+        assert obj.implementation._registered_to_satellite is True
+        assert obj.implementation._rhsm_configuration == {"foo.bar": "baz"}
+        assert obj.implementation._rhsm_observer == rhsm_observer
+        # trigger the succeeded signal
+        obj.implementation.succeeded_signal.emit()
+        # check this set the subscription-attached & registered properties to False
+        assert self.subscription_interface.IsRegistered is False
+        assert self.subscription_interface.IsRegisteredToSatellite is False
+        assert self.subscription_interface.IsSubscriptionAttached is False
+        # check the provisioning scrip has been cleared
+        assert self.subscription_module._satellite_provisioning_script is None
+>>>>>>> 1f1d373da3 (Switch asserting to pytest solution (#infra))
 
     @patch_dbus_publish_object
     def test_install_with_tasks_default(self, publisher):
@@ -1269,16 +1309,27 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
 
         # RestoreRHSMDefaultsTask
         obj = task_objs[0]
-        self.assertEqual(obj.implementation._rhsm_config_proxy, config_proxy)
+        assert obj.implementation._rhsm_config_proxy == config_proxy
 
         # TransferSubscriptionTokensTask
         obj = task_objs[1]
-        self.assertEqual(obj.implementation._transfer_subscription_tokens, False)
+        assert obj.implementation._transfer_subscription_tokens == False
 
+<<<<<<< HEAD
         # ConnectToInsightsTask
         obj = task_objs[2]
         self.assertEqual(obj.implementation._subscription_attached, False)
         self.assertEqual(obj.implementation._connect_to_insights, False)
+=======
+        # ProvisionTargetSystemForSatelliteTask
+        obj = task_objs[2]
+        assert obj.implementation._provisioning_script is None
+
+        # ConnectToInsightsTask
+        obj = task_objs[3]
+        assert obj.implementation._subscription_attached is False
+        assert obj.implementation._connect_to_insights is False
+>>>>>>> 1f1d373da3 (Switch asserting to pytest solution (#infra))
 
     @patch_dbus_publish_object
     def test_install_with_tasks_configured(self, publisher):
@@ -1304,16 +1355,27 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
 
         # RestoreRHSMDefaultsTask
         obj = task_objs[0]
-        self.assertEqual(obj.implementation._rhsm_config_proxy, config_proxy)
+        assert obj.implementation._rhsm_config_proxy == config_proxy
 
         # TransferSubscriptionTokensTask
         obj = task_objs[1]
-        self.assertEqual(obj.implementation._transfer_subscription_tokens, True)
+        assert obj.implementation._transfer_subscription_tokens == True
 
+<<<<<<< HEAD
         # ConnectToInsightsTask
         obj = task_objs[2]
         self.assertEqual(obj.implementation._subscription_attached, True)
         self.assertEqual(obj.implementation._connect_to_insights, True)
+=======
+        # ProvisionTargetSystemForSatelliteTask
+        obj = task_objs[2]
+        assert obj.implementation._provisioning_script == "foo script"
+
+        # ConnectToInsightsTask
+        obj = task_objs[3]
+        assert obj.implementation._subscription_attached is True
+        assert obj.implementation._connect_to_insights is True
+>>>>>>> 1f1d373da3 (Switch asserting to pytest solution (#infra))
 
     def _test_kickstart(self, ks_in, ks_out):
         # mock the rhsm syspurpose proxy that gets requested during
@@ -1340,10 +1402,10 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         # also test resulting module state
         structure = self.subscription_interface.SystemPurposeData
         system_purpose_data = SystemPurposeData.from_structure(structure)
-        self.assertEqual(system_purpose_data.role, "")
-        self.assertEqual(system_purpose_data.sla, "")
-        self.assertEqual(system_purpose_data.usage, "")
-        self.assertEqual(system_purpose_data.addons, [])
+        assert system_purpose_data.role == ""
+        assert system_purpose_data.sla == ""
+        assert system_purpose_data.usage == ""
+        assert system_purpose_data.addons == []
 
     def test_ks_out_set_role(self):
         """Check kickstart with role being used."""
@@ -1400,10 +1462,10 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
 
         structure = self.subscription_interface.SystemPurposeData
         system_purpose_data = SystemPurposeData.from_structure(structure)
-        self.assertEqual(system_purpose_data.role, 'FOO')
-        self.assertEqual(system_purpose_data.sla, 'BAR')
-        self.assertEqual(system_purpose_data.usage, 'BAZ')
-        self.assertEqual(system_purpose_data.addons, ["F Product", "B Feature"])
+        assert system_purpose_data.role == 'FOO'
+        assert system_purpose_data.sla == 'BAR'
+        assert system_purpose_data.usage == 'BAZ'
+        assert system_purpose_data.addons == ["F Product", "B Feature"]
 
     def test_ks_out_rhsm_parse(self):
         """Check the rhsm kickstart command is parsed correctly."""
@@ -1421,28 +1483,25 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         structure = self.subscription_interface.SubscriptionRequest
         subscription_request = SubscriptionRequest.from_structure(structure)
         # both org id and one key have been used, request should be org & key type
-        self.assertEqual(subscription_request.type, SUBSCRIPTION_REQUEST_TYPE_ORG_KEY)
-        self.assertEqual(subscription_request.organization, "123")
-        self.assertEqual(subscription_request.activation_keys.value, [])
+        assert subscription_request.type == SUBSCRIPTION_REQUEST_TYPE_ORG_KEY
+        assert subscription_request.organization == "123"
+        assert subscription_request.activation_keys.value == []
         # keys should be hidden
-        self.assertEqual(subscription_request.activation_keys.type,
-                         SECRET_TYPE_HIDDEN)
+        assert subscription_request.activation_keys.type == SECRET_TYPE_HIDDEN
         # account username & password should be empty
-        self.assertEqual(subscription_request.account_username, "")
-        self.assertEqual(subscription_request.account_password.value, "")
-        self.assertEqual(subscription_request.account_password.type,
-                         SECRET_TYPE_NONE)
-        self.assertEqual(subscription_request.server_hostname, "candlepin.foo.com")
-        self.assertEqual(subscription_request.rhsm_baseurl, "cdn.foo.com")
-        self.assertEqual(subscription_request.server_proxy_hostname, "proxy.com")
-        self.assertEqual(subscription_request.server_proxy_port, 9001)
-        self.assertEqual(subscription_request._server_proxy_user, "user")
-        self.assertEqual(subscription_request._server_proxy_password.value, "")
-        self.assertEqual(subscription_request._server_proxy_password.type,
-                         SECRET_TYPE_HIDDEN)
+        assert subscription_request.account_username == ""
+        assert subscription_request.account_password.value == ""
+        assert subscription_request.account_password.type == SECRET_TYPE_NONE
+        assert subscription_request.server_hostname == "candlepin.foo.com"
+        assert subscription_request.rhsm_baseurl == "cdn.foo.com"
+        assert subscription_request.server_proxy_hostname == "proxy.com"
+        assert subscription_request.server_proxy_port == 9001
+        assert subscription_request._server_proxy_user == "user"
+        assert subscription_request._server_proxy_password.value == ""
+        assert subscription_request._server_proxy_password.type == SECRET_TYPE_HIDDEN
 
         # insights should be enabled
-        self.assertTrue(self.subscription_interface.InsightsEnabled)
+        assert self.subscription_interface.InsightsEnabled
 
     def test_ks_out_rhsm_no_insights(self):
         """Check Insights is not enabled from kickstart without --connect-to-insights."""
@@ -1455,7 +1514,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         self._test_kickstart(ks_in, ks_out)
 
         # insights should not be
-        self.assertFalse(self.subscription_interface.InsightsEnabled)
+        assert not self.subscription_interface.InsightsEnabled
 
     def test_ks_out_rhsm_and_syspurpose(self):
         """Check that if both rhsm and syspurpose are used all works correctly."""
@@ -1475,22 +1534,22 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
 
         structure = self.subscription_interface.SystemPurposeData
         system_purpose_data = SystemPurposeData.from_structure(structure)
-        self.assertEqual(system_purpose_data.role, 'FOO')
-        self.assertEqual(system_purpose_data.sla, 'BAR')
-        self.assertEqual(system_purpose_data.usage, 'BAZ')
-        self.assertEqual(system_purpose_data.addons, ["F Product", "B Feature"])
+        assert system_purpose_data.role == 'FOO'
+        assert system_purpose_data.sla == 'BAR'
+        assert system_purpose_data.usage == 'BAZ'
+        assert system_purpose_data.addons == ["F Product", "B Feature"]
 
         # check subscription request and insights
 
         structure = self.subscription_interface.SubscriptionRequest
         subscription_request = SubscriptionRequest.from_structure(structure)
         # both org id and one key have been used, request should be org & key type
-        self.assertEqual(subscription_request.type, SUBSCRIPTION_REQUEST_TYPE_ORG_KEY)
-        self.assertEqual(subscription_request.organization, "123")
-        self.assertEqual(subscription_request.activation_keys.value, [])
-        self.assertEqual(subscription_request.activation_keys.type, SECRET_TYPE_HIDDEN)
+        assert subscription_request.type == SUBSCRIPTION_REQUEST_TYPE_ORG_KEY
+        assert subscription_request.organization == "123"
+        assert subscription_request.activation_keys.value == []
+        assert subscription_request.activation_keys.type == SECRET_TYPE_HIDDEN
         # insights should be enabled
-        self.assertTrue(self.subscription_interface.InsightsEnabled)
+        assert self.subscription_interface.InsightsEnabled
 
     @patch("pyanaconda.modules.subscription.system_purpose.give_the_system_purpose")
     def test_ks_apply_syspurpose(self, mock_give_purpose):
@@ -1562,7 +1621,13 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
         task_path = self.subscription_interface.RetrieveOrganizationsWithTask()
         obj = check_task_creation(self, task_path, publisher, RetrieveOrganizationsTask)
         # check all the data got propagated to the module correctly
+<<<<<<< HEAD
         self.assertEqual(obj.implementation._rhsm_register_server_proxy, register_server_proxy)
         self.assertEqual(obj.implementation._username, "foo_user")
         self.assertEqual(obj.implementation._password, "foo_password")
 >>>>>>> d2085cdd22 (Rename all unit tests methods to use test_* prefix (#infra))
+=======
+        assert obj.implementation._rhsm_register_server_proxy == register_server_proxy
+        assert obj.implementation._username == "foo_user"
+        assert obj.implementation._password == "foo_password"
+>>>>>>> 1f1d373da3 (Switch asserting to pytest solution (#infra))
