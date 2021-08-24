@@ -37,7 +37,6 @@ class PasswordSpoke(FirstbootSpokeMixIn, NormalTUISpoke):
        .. inheritance-diagram:: PasswordSpoke
           :parts: 3
     """
-    helpFile = "PasswordSpoke.txt"
     category = UserSettingsCategory
 
     @staticmethod
