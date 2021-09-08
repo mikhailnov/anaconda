@@ -18,6 +18,8 @@
 #
 import os
 
+from transliterate import translit
+
 from pyanaconda.core.constants import PASSWORD_POLICY_USER
 from pyanaconda.flags import flags
 from pyanaconda.core.i18n import _, CN_
@@ -566,7 +568,7 @@ class UserSpoke(FirstbootSpokeMixIn, NormalSpoke, GUISpokeInputCheckHandler):
 
         fullname = editable.get_text()
         if self.guesser:
-            username = guess_username(fullname)
+            username = guess_username(translit(fullname, 'ru', reversed=True))
             with blockedHandler(self.username_entry, self.on_username_set_by_user):
                 self.username = username
 
