@@ -95,8 +95,12 @@ class ModuleManagerTestCase(unittest.TestCase):
         observers = self._check_started_modules(task, service_names)
 
         for observer in observers:
+<<<<<<< HEAD
             assert observer.is_addon == False
 >>>>>>> 1f1d373da3 (Switch asserting to pytest solution (#infra))
+=======
+            assert observer.is_addon is False
+>>>>>>> 7bda021f54 (Fix boolean comparisons in asserts (#infra))
 
     @patch("dasbus.client.observer.Gio")
     def test_start_addons(self, gio):
@@ -118,7 +122,7 @@ class ModuleManagerTestCase(unittest.TestCase):
         observers = self._check_started_modules(task, service_names)
 
         for observer in observers:
-            assert observer.is_addon == True
+            assert observer.is_addon is True
 
     @patch("dasbus.client.observer.Gio")
     def test_start_modules_forbidden(self, gio):

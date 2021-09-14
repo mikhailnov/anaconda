@@ -1317,7 +1317,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
 
         # TransferSubscriptionTokensTask
         obj = task_objs[1]
-        assert obj.implementation._transfer_subscription_tokens == False
+        assert obj.implementation._transfer_subscription_tokens is False
 
 <<<<<<< HEAD
         # ConnectToInsightsTask
@@ -1363,7 +1363,7 @@ class SubscriptionInterfaceTestCase(unittest.TestCase):
 
         # TransferSubscriptionTokensTask
         obj = task_objs[1]
-        assert obj.implementation._transfer_subscription_tokens == True
+        assert obj.implementation._transfer_subscription_tokens is True
 
 <<<<<<< HEAD
         # ConnectToInsightsTask
