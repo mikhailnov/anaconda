@@ -133,7 +133,12 @@ class Hub(GUIObject, common.Hub):
 
         for category in common.sort_categories(categories):
             selectors = []
-            for spokeClass in sorted(cats_and_spokes[category], key=lambda s: s.title):
+            sortedSpokes = sorted(cats_and_spokes[category], key=lambda s: s.title)
+            
+            if category.__name__ == "UserSettingsCategory" and len(sortedSpokes) >= 2:
+                sortedSpokes[0], sortedSpokes[1] = sortedSpokes[1], sortedSpokes[0]
+            
+            for spokeClass in sortedSpokes:
                 # Check if this spoke is to be shown in the supported environments
                 if not any(spokeClass.should_run(environ, self.data) for environ in flags.environs):
                     continue
