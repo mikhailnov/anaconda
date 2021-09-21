@@ -17,12 +17,14 @@
 #
 import os
 import stat
+import shutil
 
 from blivet.size import Size
 from pyanaconda.anaconda_loggers import get_packaging_logger
-from pyanaconda.core.constants import PAYLOAD_TYPE_LIVE_OS, INSTALL_TREE, SOURCE_TYPE_LIVE_OS_IMAGE
+from pyanaconda.core.constants import PAYLOAD_TYPE_LIVE_OS, INSTALL_TREE, SOURCE_TYPE_LIVE_OS_IMAGE, DRACUT_ISODIR
 from pyanaconda.core.i18n import _
 from pyanaconda.modules.common.constants.services import PAYLOADS
+from pyanaconda.modules.payloads.base.utils import get_dir_size
 from pyanaconda.payload import utils as payload_utils
 from pyanaconda.payload.errors import PayloadSetupError
 from pyanaconda.payload.live.payload_base import BaseLivePayload
@@ -94,5 +96,8 @@ class LiveOSPayload(BaseLivePayload):
 
     @property
     def space_required(self):
-        from pyanaconda.modules.payloads.base.utils import get_dir_size
-        return Size(get_dir_size("/") * 1024)
+        try:
+            _, used, _ = shutil.disk_usage(DRACUT_ISODIR)
+            return Size(used)
+        except Exception:
+            return Size(get_dir_size("/") * 1024)

@@ -30,6 +30,16 @@ from pykickstart.constants import AUTOPART_TYPE_PLAIN, AUTOPART_TYPE_BTRFS, AUTO
 
 log = get_module_logger(__name__)
 
+# ROSA disks memory hub
+# size - total size of all selected disks
+# free - total free space of all selected disks
+# need - needed space to install system on selected disks
+installation_info = {
+    "size" : Size(0),
+    "free" : Size(0),
+    "need" : Size(0)
+}
+
 # Maximum ratio of swap size to disk size (10 %).
 MAX_SWAP_DISK_RATIO = Decimal('0.1')
 
@@ -275,16 +285,21 @@ def suggest_swap_size(quiet=False, hibernation=False, disk_space=None):
     if not quiet:
         log.info("Detected %s of memory", mem)
 
+    log.debug("disk_space in swap: {}".format(disk_space))
+
     sixty_four_gib = Size("64 GiB")
 
     # the succeeding if-statement implements the following formula for
     # suggested swap size.
     #
-    # swap(mem) = 2 * mem, if mem < 2 GiB
+    # swap(mem) = 1 GiB, if disk size < 20 Gib
+    #           = 2 * mem, if mem < 2 GiB
     #           = mem,     if 2 GiB <= mem < 8 GiB
     #           = mem / 2, if 8 GIB <= mem < 64 GiB
     #           = 4 GiB,   if mem >= 64 GiB
-    if mem < Size("2 GiB"):
+    if disk_space <= Size("20 GiB"):
+        swap = Size("1 GiB")
+    elif mem < Size("2 GiB"):
         swap = 2 * mem
 
     elif mem < Size("8 GiB"):
@@ -292,7 +307,7 @@ def suggest_swap_size(quiet=False, hibernation=False, disk_space=None):
 
     elif mem < sixty_four_gib:
         swap = mem / 2
-
+        
     else:
         swap = Size("4 GiB")
 
@@ -317,3 +332,17 @@ def suggest_swap_size(quiet=False, hibernation=False, disk_space=None):
         log.info("Swap attempt of %s", swap)
 
     return swap
+
+def set_installation_info(size, free, need : Size):
+    installation_info["size"] = size
+    installation_info["free"] = free
+    installation_info["need"] = need
+
+def get_selected_disks_total_size() -> Size:
+    return installation_info["size"]
+
+def get_selected_disks_total_free_space() -> Size:
+    return installation_info["size"]
+
+def get_selected_disks_need_space() -> Size:
+    return installation_info["need"]
