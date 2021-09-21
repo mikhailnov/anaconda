@@ -129,10 +129,8 @@ class ProgressSpoke(StandaloneSpoke):
 
         # Enable the continue button.
         self.window.set_may_continue(True)
-
-        # Hide the quit button.
-        quit_button = self.window.get_quit_button()
-        quit_button.hide()
+        
+        util.set_installation_over_status()
 
         # kickstart install, continue automatically if reboot or shutdown selected
         if flags.automatedInstall and self.data.reboot.action in [KS_REBOOT, KS_SHUTDOWN]:
@@ -144,7 +142,9 @@ class ProgressSpoke(StandaloneSpoke):
         self.window.set_may_continue(False)
 
         # Set the label of the continue button.
-        if conf.target.is_hardware and conf.system.can_reboot:
+        # In ROSA we decided to keep both "Exit" and "Reboot" buttons
+        # on finish screen regardless of distro type
+        if conf.target.is_hardware:
             continue_label = C_("GUI|Progress", "_Reboot System")
         else:
             continue_label = C_("GUI|Progress", "_Finish Installation")

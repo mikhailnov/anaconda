@@ -897,6 +897,8 @@ class GraphicalUserInterface(UserInterface):
 
         # If we're on the last screen, clicking Continue quits.
         if len(self._actions) == 1:
+            from pyanaconda.core.util import set_installation_reboot_status
+            set_installation_reboot_status()
             Gtk.main_quit()
             return
 
@@ -962,16 +964,19 @@ class GraphicalUserInterface(UserInterface):
         if not win.get_quit_button():
             return
 
-        dialog = self._quitDialog(None)
-        with self.mainWindow.enlightbox(dialog.window):
-            rc = dialog.run()
-            dialog.window.destroy()
-
-        if rc == 1:
-            self._currentAction.exited.emit(self._currentAction)
-            util.ipmi_abort(scripts=self.data.scripts)
+        from pyanaconda.core.util import get_installation_status
+        if get_installation_status()["over"]:
             Gtk.main_quit()
+        else:
+            dialog = self._quitDialog(None)
+            with self.mainWindow.enlightbox(dialog.window):
+                rc = dialog.run()
+                dialog.window.destroy()
 
+            if rc == 1:
+                self._currentAction.exited.emit(self._currentAction)
+                util.ipmi_abort(scripts=self.data.scripts)
+                Gtk.main_quit()
 
 class GraphicalExceptionHandlingIface(meh.ui.gui.GraphicalIntf):
     """

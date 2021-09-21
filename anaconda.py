@@ -82,7 +82,15 @@ def exitHandler(rebootData):
         pidfile.close()
 
     # Reboot the system.
-    if conf.system.can_reboot:
+    # In ROSA we decided to keep both "Exit" and "Reboot" buttons
+    # after system installation in last spoke. 
+    # So continue action in that spoke should reboot
+    # your system. To exit from instalation you should press
+    # Quit button or x-mark on top of the installator window
+    # Reboot the system.
+    from pyanaconda.core.util import get_installation_status
+    stauts = get_installation_status()
+    if stauts["reboot"] and stauts["over"]:
         from pykickstart.constants import KS_SHUTDOWN, KS_WAIT
 
         if flags.eject or rebootData.eject:

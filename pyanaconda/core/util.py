@@ -55,7 +55,10 @@ program_log = get_program_logger()
 from pykickstart.constants import KS_SCRIPT_ONERROR
 
 _child_env = {}
-
+_installation_status = {
+    "over": False,
+    "reboot": False 
+}
 
 def setenv(name, value):
     """ Set an environment variable to be used by child processes.
@@ -1552,3 +1555,12 @@ def restorecon(paths, root, skip_nonexistent=False):
         return False
     else:
         return True
+
+def get_installation_status():
+    return _installation_status
+
+def set_installation_over_status(over=True):
+    _installation_status["over"] = over
+
+def set_installation_reboot_status(reboot=True):
+    _installation_status["reboot"] = reboot
