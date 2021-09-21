@@ -276,7 +276,7 @@ def get_default_partitioning():
             btr=not swap,
             size=attrs.get("min") or attrs.get("size"),
             max_size=attrs.get("max"),
-            grow="min" in attrs,
+            grow="min" in attrs and name != "swap",
             required_space=attrs.get("free") or 0,
             encrypted=True,
         )
