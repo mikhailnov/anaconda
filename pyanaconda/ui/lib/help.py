@@ -18,7 +18,6 @@
 """
 Anaconda built-in help module
 """
-import functools
 import os
 import json
 from collections import namedtuple
@@ -108,7 +107,6 @@ def _get_help_args_for_screen(display_mode, screen_id):
     return None
 
 
-@functools.cache
 def _get_help_mapping(display_mode):
     """Parse the json file containing the help mapping.
 
