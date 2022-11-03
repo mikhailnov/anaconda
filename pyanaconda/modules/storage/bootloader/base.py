@@ -751,9 +751,12 @@ class BootLoader(object):
 
         # Add resume= option to enable hibernation on x86.
         # Choose the largest swap device for that.
-        if blivet.arch.is_x86() and swap_devices:
-            resume_device = max(swap_devices, key=lambda x: x.size)
-            self.boot_args.add("resume=%s" % resume_device.fstab_spec)
+        #
+        # Disabled for Rosa, update-grub2 set device for hibernate
+        #
+        # if blivet.arch.is_x86() and swap_devices:
+        #    resume_device = max(swap_devices, key=lambda x: x.size)
+        #    self.boot_args.add("resume=%s" % resume_device.fstab_spec)
 
         # Does /usr have its own device? If so, we need to tell dracut
         usr_device = storage.mountpoints.get("/usr")
