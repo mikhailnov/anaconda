@@ -187,6 +187,8 @@ Requires: tmux
 Requires: gdb
 # support for installation from image and live & live image installations
 Requires: rsync
+# External tooling for managing NVMe-FC devices in the installation environment
+Recommends: nvme-cli
 
 %description install-env-deps
 The anaconda-install-env-deps metapackage lists all installation environment dependencies.
@@ -226,6 +228,10 @@ Requires: device-mapper-multipath
 %if 0%{?rhel} != 9
 Requires: zram-generator-defaults
 %endif
+# Submitting bugs to bugzilla
+Requires: libreport-rhel-anaconda-bugzilla
+# External tooling for managing NVMe-FC devices in the installation environment
+Requires: nvme-cli
 
 %description install-img-deps
 The anaconda-install-img-deps metapackage lists all boot.iso installation image dependencies.
