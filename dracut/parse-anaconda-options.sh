@@ -13,9 +13,7 @@ modprobe -q edd
 # get some info from .buildstamp
 buildstamp=/run/initramfs/.buildstamp
 [ -f /.buildstamp ] && buildstamp=/.buildstamp
-if [ ! -f $buildstamp ]; then
-    warn ".buildstamp missing"
-else
+if [ -f $buildstamp ]; then
     product=$(config_get Main Product < $buildstamp)
     version=$(config_get Main Version < $buildstamp)
     # TODO: this is silly. There should be an "Arch" item in there..
@@ -23,6 +21,8 @@ else
     strstr "$uuid" "." && arch=${uuid##*.}
 fi
 [ -z "$arch" ] && arch=$(uname -m)
+[ -z "$product" ] && product="$(. /etc/os-release && echo "$NAME")"
+[ -z "$version" ] && version="$(. /etc/os-release && echo "$VERSION")"
 echo Loading $product $version $arch installer...
 
 # set HTTP headers so server(s) will recognize us
