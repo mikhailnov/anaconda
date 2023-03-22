@@ -363,21 +363,6 @@ class GRUB2(BootLoader):
         except (BootLoaderError, OSError, RuntimeError) as e:
             log.error("boot loader password setup failed: %s", e)
 
-        # make sure the default entry is the OS we are installing
-        if self.default is not None:
-            machine_id_path = conf.target.system_root + "/etc/machine-id"
-            if not os.access(machine_id_path, os.R_OK):
-                log.error("failed to read machine-id, default entry not set")
-                return
-
-            with open(machine_id_path, "r") as fd:
-                machine_id = fd.readline().strip()
-
-            default_entry = "%s-%s" % (machine_id, self.default.version)
-            rc = util.execInSysroot("grub2-set-default", [default_entry])
-            if rc:
-                log.error("failed to set default menu entry to %s", productName)
-
         # set menu_auto_hide grubenv variable if we should enable menu_auto_hide
         # set boot_success so that the menu is hidden on the boot after install
         if conf.bootloader.menu_auto_hide:
