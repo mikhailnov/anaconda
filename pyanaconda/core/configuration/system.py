@@ -66,7 +66,7 @@ class SystemSection(Section):
     @property
     def can_reboot(self):
         """Can we reboot the system?"""
-        return self._is_boot_iso or self._is_booted_os
+        return self._is_boot_iso or self._is_booted_os or self._is_live_os
 
     @property
     def can_start_user_systemd(self):
@@ -81,7 +81,7 @@ class SystemSection(Section):
     @property
     def can_audit(self):
         """Can we run the audit daemon?"""
-        return self._is_boot_iso
+        return self._is_boot_iso or self._is_live_os
 
     @property
     def can_set_hardware_clock(self):
@@ -130,12 +130,12 @@ class SystemSection(Section):
     @property
     def can_modify_syslog(self):
         """Can we modify syslog?"""
-        return self._is_boot_iso or self._is_booted_os
+        return self._is_boot_iso or self._is_booted_os or self._is_live_os
 
     @property
     def can_change_hostname(self):
         """Can we change the hostname?"""
-        return self._is_boot_iso or self._is_booted_os
+        return self._is_boot_iso or self._is_booted_os or self._is_live_os
 
     @property
     def can_configure_network(self):
