@@ -198,7 +198,7 @@ class InstalledFilesTestCase(RPMTestCase):
         src_files = self._apply_maps(
             [
                 ModifyingFilters.remove_data_systemd_prefix,
-                lambda x: ModifyingFilters.apply_rpm_prefix("/usr/lib/systemd/system", x)
+                lambda x: ModifyingFilters.apply_rpm_prefix("/lib/systemd/system", x)
             ], src_files
         )
 

@@ -70,7 +70,7 @@ def start_user_systemd():
         log.debug("Don't start the user instance of systemd.")
         return
 
-    childproc = util.startProgram(["/usr/lib/systemd/systemd", "--user"])
+    childproc = util.startProgram(["/lib/systemd/systemd", "--user"])
     WatchProcesses.watch_process(childproc, "systemd")
 
 
