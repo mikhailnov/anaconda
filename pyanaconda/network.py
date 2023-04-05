@@ -262,9 +262,13 @@ def initialize_network():
 
     if not network_proxy.Hostname:
         bootopts_hostname = hostname_from_cmdline(kernel_arguments)
+        current_hostname = socket.gethostname()
         if bootopts_hostname:
             log.debug("Updating host name from boot options: %s", bootopts_hostname)
             network_proxy.SetHostname(bootopts_hostname)
+        elif current_hostname:
+            log.debug("Setting current hostname %s as hostname", current_hostname)
+            network_proxy.SetHostname(current_hostname)
 
     # Create device configuration tracking in the module.
     # It will be used to generate kickstart from persistent network configuration
