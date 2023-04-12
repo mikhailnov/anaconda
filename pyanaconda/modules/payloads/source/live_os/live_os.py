@@ -112,7 +112,7 @@ class LiveOSSourceModule(PayloadSourceBase, MountingSourceMixin):
     def detect_live_os_image(self):
         """Detect live os image in the system."""
         log.debug("Trying to detect live os base image automatically")
-        for block_device in ["/dev/mapper/live-base", "/dev/mapper/live-osimg-min"]:
+        for block_device in ["/dev/mapper/live-base", "/dev/mapper/live-osimg-min", "/dev/loop1", "/dev/loop0"]:
             try:
                 if stat.S_ISBLK(os.stat(block_device)[stat.ST_MODE]):
                     log.debug("Detected live base image %s", block_device)
