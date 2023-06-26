@@ -28,7 +28,7 @@ from pyanaconda.product import productName
 from pyanaconda.anaconda_loggers import get_module_logger
 log = get_module_logger(__name__)
 
-__all__ = ["EFIBase", "EFIGRUB", "Aarch64EFIGRUB", "ArmEFIGRUB", "MacEFIGRUB"]
+__all__ = ["EFIBase", "EFIGRUB", "Aarch64EFIGRUB", "ArmEFIGRUB"]
 
 
 class EFIBase(object):
@@ -246,31 +246,3 @@ class ArmEFIGRUB(EFIGRUB):
         self._packages32 = ["grub2-efi"]
         self._is_32bit_firmware = True
 
-
-class MacEFIGRUB(EFIGRUB):
-    def __init__(self):
-        super().__init__()
-        self._packages64.extend(["grub2", "mactel-boot"])
-
-    def mactel_config(self):
-        if os.path.exists(conf.target.system_root + "/usr/libexec/mactel-boot-setup"):
-            rc = util.execInSysroot("/usr/libexec/mactel-boot-setup", [])
-            if rc:
-                log.error("failed to configure Mac boot loader")
-
-    def install(self, args=None):
-        super().install()
-        self.mactel_config()
-
-    def is_valid_stage1_device(self, device, early=False):
-        valid = super().is_valid_stage1_device(device, early)
-
-        # Make sure we don't pick the OSX root partition
-        if valid and getattr(device.format, "name", "") != "Linux HFS+ ESP":
-            valid = False
-
-        if hasattr(device.format, "name"):
-            log.debug("device.format.name is '%s'", device.format.name)
-
-        log.debug("MacEFIGRUB.is_valid_stage1_device(%s) returning %s", device.name, valid)
-        return valid
